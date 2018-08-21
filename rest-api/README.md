@@ -14,3 +14,9 @@
 * In the background, `workers` perform all the `checks` at the appropriate times, and send `alerts` to the users when a check changes its `state` from `up` to `down`. or vise versa.
 
 * *For SMS notification capacity, **Twilio** would be used.*
+
+
+## Lesson learned and Notes.
+
+`url` module provides methods to parse the url.
+
