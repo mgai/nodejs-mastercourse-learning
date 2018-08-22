@@ -41,8 +41,7 @@ const unifiedServer = function(req, res) {
         buffer += decoder.end();
 
         // Choose the handler this request should go to.
-        const chosenHander = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
-
+        const chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
         // Construct the data object to send to the handler.
         const data = {
             trimmedPath,
@@ -53,7 +52,7 @@ const unifiedServer = function(req, res) {
         };
 
         // Route the request to the handler specified.
-        chosenHander(data, function(statusCode, payload){
+        chosenHandler(data, function(statusCode, payload){
             // Use the status code called back by the handler, or default to 200.
             statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
 
@@ -115,7 +114,13 @@ handlers.notFound = function(data, callback) {
     callback(404);
 };
 
+// Ping hanlder.
+handlers.ping = function(data, callback) {
+    callback(200);
+}
+
 // Define a request router.
 const router = {
-    'sample': handlers.sample
+    'sample': handlers.sample,
+    'ping': handlers.ping
 };
