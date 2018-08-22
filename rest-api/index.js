@@ -119,8 +119,14 @@ handlers.ping = function(data, callback) {
     callback(200);
 }
 
+// Hello handler - Homework #1
+handlers.hello = function(data, callback) {
+    callback(200, {'message': 'Hello my friend.'});
+}
+
 // Define a request router.
 const router = {
     'sample': handlers.sample,
-    'ping': handlers.ping
+    'ping': handlers.ping,
+    'hello': handlers.hello
 };
