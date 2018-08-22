@@ -21,7 +21,7 @@ lib.baseDir = path.join(__dirname, '/../.data');    // Construct the absolute pa
  * @param callback callback(err) pattern - false means no error.
  */
 lib.create = function(dir, file, data, callback) {
-    fs.open(lib.baseDir + dir + '/' + file + '.json', 'wx', function(err, fd){
+    fs.open([lib.baseDir,dir,file].join(path.sep) + '.json', 'wx', function(err, fd){
         if (!err && fd) {
             // Convert data to string.
             let stringData = JSON.stringify(data);
@@ -40,7 +40,7 @@ lib.create = function(dir, file, data, callback) {
                 }
             });
         } else {
-            callback(new Error('Could not create new file, it may already exist'));
+            callback(new Error('Could not create new file, it may already exist', err.message));
         }
     });
 };
