@@ -10,6 +10,7 @@ const fs = require('fs');
 const StringDecoder = require('string_decoder').StringDecoder;
 
 const config = require('./config'); // Default to load `config.js`.
+const _data = require('./lib/data');    // require data.js
 
 // All the server logic for both http and https.
 const unifiedServer = function(req, res) {
