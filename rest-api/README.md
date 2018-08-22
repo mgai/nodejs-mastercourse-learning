@@ -23,4 +23,4 @@
 When processing data, `req` would emit two types of events - 
 
 1. `data` event, ONLY IF there's payload.
-1. `end` event, **ALWAYS** be emitted regardless of the existence of the payload.
+2. `end` event, **ALWAYS** be emitted regardless of the existence of the payload.
