@@ -26,3 +26,9 @@ When processing data, `req` would emit two types of events -
 2. `end` event, **ALWAYS** be emitted regardless of the existence of the payload.
 
 By setting `Content-Type: application/json` with the `res.setHeader()` call, the client who understands JSON can now parse the return instead of treating it as raw string.
+
+Use `typeof() == '...'` to check if the variable is set.
+
+Leverage `process.env.NODE_ENV` for environment context setting.
+
+`process.env` contains all the environment variables, as the name suggests.
