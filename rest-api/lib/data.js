@@ -40,11 +40,60 @@ lib.create = function(dir, file, data, callback) {
                 }
             });
         } else {
-            callback(new Error('Could not create new file, it may already exist', err.message));
+            callback(new Error('Could not create new file, it may already exist ' + err.message));
         }
     });
 };
 
+// Read data from a file.
+lib.read = function(dir, file, callback) {
+    fs.readFile([lib.baseDir, dir, file].join(path.sep)+'.json', 'utf8', function(err, data){
+        callback(err, data);
+    })
+};
+
+// Update data inside a file.
+lib.update = function(dir, file, data, callback){
+    // Open the file for writing.
+    fs.open([lib.baseDir, dir, file].join(path.sep) + '.json', 'r+', function(err, fd) {
+        if(!err && fd) {
+            let stringData = JSON.stringify(data);
+            fs.ftruncate(fd, function(err) {
+                if(!err) {
+                    fs.writeFile(fd, stringData, function(err) {
+                        if(!err) {
+                            fs.close(fd, function(err) {
+                                if (!err) {
+                                    callback(false);
+                                } else {
+                                    callback('Error closing the file');
+                                }
+                            })
+                        } else {
+                            callback('Error writing to existing file.');
+                        }
+                    });
+                } else {
+                    callback(new Error(err, 'Error truncating file'));
+                }
+            })
+        } else {
+            callback(new Error(err, 'Could not open the file for updating, it may not exist yet.'))
+        };
+    });
+};
+
+// Delete a file.
+lib.delete = function(dir, file, callback) {
+    // Unlink - means delete.
+    fs.unlink([lib.baseDir, dir, file].join(path.sep) + '.json', function(err) {
+        if(!err) {
+            callback(false);
+        } else {
+            callback(new Error('Error deleting file:' + err.message));
+        }
+    });
+};
 
 // Export the module.
 module.exports = lib;
