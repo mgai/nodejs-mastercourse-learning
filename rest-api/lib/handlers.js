@@ -171,11 +171,11 @@ handlers._users.delete = function(data, callback) {
                         // Return deleted user record.
                         callback(200, data);
                     } else {
-                        callback(500);
+                        callback(500, {'Error':'Could not delete the specified user.'});
                     }
                 });
             } else {
-                callback(404);
+                callback(400, {'Error': 'Could not find the specified user.'});
             }
         });
     } else {
