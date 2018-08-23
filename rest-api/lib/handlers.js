@@ -6,8 +6,12 @@
 const _data = require('./data');
 const helpers = require('./helpers');
 
+const tokenHandlers = require('./handlers.tokens');
+
 // Define the handlers.
 const handlers = {};
+
+handlers._tokens = tokenHandlers;
 
 /*
  * data - Captures all the data in the request.
@@ -39,7 +43,6 @@ handlers._users = {};
  * @requires data {fistName, lastName, phone, password, tosAgreement}
  */
 handlers._users.post = function(data, callback) {
-    console.log(data);
     let firstName = typeof(data.payload.firstName) == 'string' && data.payload.firstName.trim().length > 0 ? data.payload.firstName.trim() : false;
     let lastName = typeof(data.payload.lastName) == 'string' && data.payload.lastName.trim().length > 0 ? data.payload.lastName.trim() : false;
     let phone = typeof(data.payload.phone) == 'string' && data.payload.phone.trim().length > 0 ? data.payload.phone.trim() : false;
@@ -56,7 +59,7 @@ handlers._users.post = function(data, callback) {
                 if(hashedPassword) {
                     // Create the user object.
                     let userObject = { firstName, lastName, phone, hashedPassword, tosAgreement };
-                    _data.create('user', phone, userObject, function(err){
+                    _data.create('users', phone, userObject, function(err){
                         if(!err) {
                             callback(200);
                         } else {
@@ -89,7 +92,7 @@ handlers._users.get = function(data, callback) {
     // Check the phone number is valid.
     let phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim() > 5 ? data.queryStringObject.phone : false;
     if(phone) {
-        _data.read('user', phone, function(err, data){
+        _data.read('users', phone, function(err, data){
             if(!err && data) {
                 // Remove hashedPassword from the object to be returned.
                 delete data.hashedPassword;
@@ -120,14 +123,14 @@ handlers._users.put = function(data, callback) {
 
     if(phone) {
         if(firstName||lastName||password) {
-            _data.read('user', phone, function(err, data){
+            _data.read('users', phone, function(err, data){
                 if(!err && data) {
                     // Update the fields necessary.
                     if(firstName) data.firstName = firstName;
                     if(lastName) data.lastName = lastName;
                     if(password) data.hashedPassword = helpers.hash(password);
 
-                    _data.update('user', phone, data, function(err){
+                    _data.update('users', phone, data, function(err){
                         if(!err) {
                             callback(200, data);
                         } else {
@@ -159,14 +162,14 @@ handlers._users.put = function(data, callback) {
  */
 handlers._users.delete = function(data, callback) {
     // Check the phone number is valid.
-    let phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim() > 5 ? data.queryStringObject.phone : false;
+    let phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length > 5 ? data.queryStringObject.phone : false;
     if(phone) {
-        _data.read('user', phone, function(err, data){
+        _data.read('users', phone, function(err, data){
             if(!err && data) {
                 // Remove hashedPassword from the object to be returned.
                 delete data.hashedPassword;
 
-                _data.delete('user', phone, function(err){
+                _data.delete('users', phone, function(err){
                     if(!err) {
                         // Return deleted user record.
                         callback(200, data);
@@ -182,6 +185,17 @@ handlers._users.delete = function(data, callback) {
         callback(400, {'Error': 'Missing required field.'});
     }
 
+};
+
+// Tokens
+handlers.tokens = function(data, callback) {
+    let acceptableMethods = ['post', 'get', 'put', 'delete'];
+    if(acceptableMethods.indexOf(data.method) > -1) {
+        // Here we will pass to sub handler.
+        handlers._tokens[data.method](data, callback);
+    } else {
+        callback(405); // HTTP 405 - Method not allowed.
+    }
 };
 
 

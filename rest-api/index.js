@@ -105,5 +105,6 @@ const router = {
     'sample': handlers.sample,
     'ping': handlers.ping,
     'hello': handlers.hello,
-    'users': handlers.users
+    'users': handlers.users,
+    'tokens': handlers.tokens
 };

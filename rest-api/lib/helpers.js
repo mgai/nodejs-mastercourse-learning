@@ -33,5 +33,25 @@ helpers.parseJsonToObject  = function(str) {
     }
 }
 
+// Generate random string for specified length.
+// Mainly used for Token name.
+helpers.createRandomString = function(len) {
+    len = typeof(len) == 'number' && len > 0 ? len : false;
+    if(len) {
+        // Define all the possible characters that could go into a string.
+        let possibleCharacters = 'abcdefghijklmnopqrstuvwxyz123456789';
+
+        // Start the final string.
+        let str = '';
+
+        for (let i=0; i<len; i++) {
+            str += possibleCharacters[Math.floor(Math.random()*possibleCharacters.length)];
+        }
+
+        return str;
+    } else
+        return false;
+}
+
 // Exports.
 module.exports = helpers;
