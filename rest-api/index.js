@@ -11,6 +11,8 @@ const StringDecoder = require('string_decoder').StringDecoder;
 
 const config = require('./config'); // Default to load `config.js`.
 const _data = require('./lib/data');    // require data.js
+const handlers = require('./lib/handlers');
+const helpers = require('./lib/helpers');
 
 // All the server logic for both http and https.
 const unifiedServer = function(req, res) {
@@ -49,7 +51,7 @@ const unifiedServer = function(req, res) {
             queryStringObject,
             method,
             headers,
-            'payload': buffer
+            'payload': helpers.parseJsonToObject(buffer)
         };
 
         // Route the request to the handler specified.
@@ -98,36 +100,10 @@ httpsServer.listen(config.httpsPort, function(){
     console.log(`The server is listening on port ${config.httpsPort} now in ${config.envName} mode.`);
 });
 
-
-
-// Define the handlers.
-const handlers = {};
-
-/*
- * data - Captures all the data in the request.
- * Callback - the function to call after handling done., with a http status code, and a payload.
- */
-handlers.sample = function(data, callback) {
-    // HTTP 406 Statust code - Not acceptable
-    callback(406, {'name': 'sample handler'});
-};
-handlers.notFound = function(data, callback) {
-    callback(404);
-};
-
-// Ping hanlder.
-handlers.ping = function(data, callback) {
-    callback(200);
-}
-
-// Hello handler - Homework #1
-handlers.hello = function(data, callback) {
-    callback(200, {'message': 'Hello my friend.'});
-}
-
 // Define a request router.
 const router = {
     'sample': handlers.sample,
     'ping': handlers.ping,
-    'hello': handlers.hello
+    'hello': handlers.hello,
+    'users': handlers.users
 };

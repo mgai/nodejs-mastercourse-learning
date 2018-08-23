@@ -34,8 +34,19 @@ Leverage `process.env.NODE_ENV` for environment context setting.
 `process.env` contains all the environment variables, as the name suggests.
 
 
+
+
 ## Create SSL certificate.
 ```bash
 openssl req -newkey  rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
 ### Common name: refers to the host. : localhost
 ```
+
+## Design notes
+
+### Users
+
+User `phone` must be **unique**, since we would be SMS user.
+We will also store the users by their phone number, so that the FS tree would be `.data/user/{phonenumber}.json`
+
+
