@@ -85,32 +85,42 @@ handlers._users.post = function(data, callback) {
 
 /**
  * Users.get
+ * Only authenticated user access their object. No cross access other's。
+ * Token shall be added in the request header part.
  * @requires data Reqest data, where phone is mandatory in the queryString.
- * @todo Only authenticated user access their object. No cross access other's
  */
 handlers._users.get = function(data, callback) {
     // Check the phone number is valid.
     let phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim() > 5 ? data.queryStringObject.phone : false;
     if(phone) {
-        _data.read('users', phone, function(err, data){
-            if(!err && data) {
-                // Remove hashedPassword from the object to be returned.
-                delete data.hashedPassword;
-                callback(200, data);
+
+        // Get the token from the headers.
+        let token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
+        // Verify the token is valid for the given user.
+        handlers._tokens.verifyToken(token, phone, function(tokenIsValid) {
+            if(tokenIsValid) {
+                _data.read('users', phone, function(err, data){
+                    if(!err && data) {
+                        // Remove hashedPassword from the object to be returned.
+                        delete data.hashedPassword;
+                        callback(200, data);
+                    } else {
+                        callback(404);
+                    }
+                });
             } else {
-                callback(404);
+                callback(403, {'Error': 'Missing required token in header or token is invalid.'});
             }
-        });
+        })
     } else {
         callback(400, {'Error': 'Missing required field.'});
     }
-
 };
 
 /**
  * Users.put - To update the user details.
+ * Token shall be added in the request header part.
  * @requires {phone} 
- * @todo Authentication check.
  */
 handlers._users.put = function(data, callback) {
     // Check the phone number is valid.
@@ -123,25 +133,34 @@ handlers._users.put = function(data, callback) {
 
     if(phone) {
         if(firstName||lastName||password) {
-            _data.read('users', phone, function(err, data){
-                if(!err && data) {
-                    // Update the fields necessary.
-                    if(firstName) data.firstName = firstName;
-                    if(lastName) data.lastName = lastName;
-                    if(password) data.hashedPassword = helpers.hash(password);
-
-                    _data.update('users', phone, data, function(err){
-                        if(!err) {
-                            callback(200, data);
+            // Get the token from the headers.
+            let token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
+            // Verify the token is valid for the given user.
+            handlers._tokens.verifyToken(token, phone, function(tokenIsValid) {
+                if(tokenIsValid) {
+                    _data.read('users', phone, function(err, data){
+                        if(!err && data) {
+                            // Update the fields necessary.
+                            if(firstName) data.firstName = firstName;
+                            if(lastName) data.lastName = lastName;
+                            if(password) data.hashedPassword = helpers.hash(password);
+        
+                            _data.update('users', phone, data, function(err){
+                                if(!err) {
+                                    callback(200, data);
+                                } else {
+                                    console.log(err);
+                                    // HTTP 500 here for valid user input but somethng wrong at the server side.
+                                    callback(500, {'Error': 'Could not update the user.'});
+                                }
+                            });
                         } else {
-                            console.log(err);
-                            // HTTP 500 here for valid user input but somethng wrong at the server side.
-                            callback(500, {'Error': 'Could not update the user.'});
+                            // Also applies for 404, but some prefer not to have 404 in PUT.
+                            callback(400, {'Error': 'The specified user does not exist.'});
                         }
                     });
                 } else {
-                    // Also applies for 404, but some prefer not to have 404 in PUT.
-                    callback(400, {'Error': 'The specified user does not exist.'});
+                    callback(403, {'Error': 'Missing required token in header or token is invalid.'});
                 }
             });
         } else {
@@ -158,33 +177,40 @@ handlers._users.put = function(data, callback) {
 /**
  * Users.delete
  * @requires {phone} 
- * @todo Authentication check.
  */
 handlers._users.delete = function(data, callback) {
     // Check the phone number is valid.
     let phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length > 5 ? data.queryStringObject.phone : false;
     if(phone) {
-        _data.read('users', phone, function(err, data){
-            if(!err && data) {
-                // Remove hashedPassword from the object to be returned.
-                delete data.hashedPassword;
-
-                _data.delete('users', phone, function(err){
-                    if(!err) {
-                        // Return deleted user record.
-                        callback(200, data);
+        // Get the token from the headers.
+        let token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
+        // Verify the token is valid for the given user.
+        handlers._tokens.verifyToken(token, phone, function(tokenIsValid) {
+            if(tokenIsValid) {
+                _data.read('users', phone, function(err, data){
+                    if(!err && data) {
+                        // Remove hashedPassword from the object to be returned.
+                        delete data.hashedPassword;
+        
+                        _data.delete('users', phone, function(err){
+                            if(!err) {
+                                // Return deleted user record.
+                                callback(200, data);
+                            } else {
+                                callback(500, {'Error':'Could not delete the specified user.'});
+                            }
+                        });
                     } else {
-                        callback(500, {'Error':'Could not delete the specified user.'});
+                        callback(400, {'Error': 'Could not find the specified user.'});
                     }
                 });
             } else {
-                callback(400, {'Error': 'Could not find the specified user.'});
+                callback(403, {'Error': 'Missing required token in header or token is invalid.'});
             }
         });
     } else {
         callback(400, {'Error': 'Missing required field.'});
     }
-
 };
 
 // Tokens
