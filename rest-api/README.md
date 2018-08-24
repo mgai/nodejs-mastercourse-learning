@@ -49,4 +49,8 @@ openssl req -newkey  rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out 
 User `phone` must be **unique**, since we would be SMS user.
 We will also store the users by their phone number, so that the FS tree would be `.data/user/{phonenumber}.json`
 
+### Checks
 
+Each `check` will be identified with the `createRandomString(20)` call as the ID, which you can see as the `UUID` way or the `ObjectId()` in the MongoDB.
+
+> Here we store Check as an independent object hence it has its own folder in the FS. However in the `NoSQL` approach, since check is definitely a personal belongings to the user, I believe we can simply embed completely all the checks as cascaded JSON object, rather than keeping only the Primary Key within each other.

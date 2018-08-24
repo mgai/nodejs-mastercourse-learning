@@ -7,11 +7,13 @@ const _data = require('./data');
 const helpers = require('./helpers');
 
 const tokenHandlers = require('./handlers.tokens');
+const checkHandlers = require('./handlers.checks');
 
 // Define the handlers.
 const handlers = {};
 
 handlers._tokens = tokenHandlers;
+handlers._checks = checkHandlers;
 
 /*
  * data - Captures all the data in the request.
@@ -78,7 +80,9 @@ handlers._users.post = function(data, callback) {
             }
         });
     } else {
+        console.log('-----------------');
         console.log(firstName, lastName, phone, password, tosAgreement);
+        console.log('-----------------');
         callback(400, {'Error': 'Missing required fields'});
     }
 };
@@ -210,6 +214,17 @@ handlers._users.delete = function(data, callback) {
         });
     } else {
         callback(400, {'Error': 'Missing required field.'});
+    }
+};
+
+// Checks
+handlers.checks = function(data, callback) {
+    let acceptableMethods = ['post', 'get', 'put', 'delete'];
+    if(acceptableMethods.indexOf(data.method) > -1) {
+        // Here we will pass to sub handler.
+        handlers._checks[data.method](data, callback);
+    } else {
+        callback(405); // HTTP 405 - Method not allowed.
     }
 };
 
