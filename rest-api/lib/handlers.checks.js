@@ -5,7 +5,7 @@
 // Dependencies.
 const _data = require('./data');
 const _tokens = require('./handlers.tokens');
-const config = require('../config');
+const config = require('./config');
 const helpers = require('./helpers');
 
 // General container.

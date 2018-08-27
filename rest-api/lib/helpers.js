@@ -8,7 +8,7 @@ const querystring = require('querystring');
 // http and https modules do not work only to start a server, but also the functions for server communication.
 const https = require('https');
 
-const config = require('../config');
+const config = require('./config');
 
 // Container.
 let helpers = {};
