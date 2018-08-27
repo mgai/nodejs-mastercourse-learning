@@ -11,13 +11,20 @@ const environments = {};
  * therefore, `envName` is created to mark the actual enviornment used.
  */
 
+twilio = {
+    'accountSid': 'ACb32d411ad7fe886aac54c665d25e5c5d',
+    'authToken': '9455e3eb3109edc12e3d8c92768f7a67',
+    'fromPhone': '+15005550006'
+}
+
 // Staging (default) environment
 environments.staging = {
     'httpPort': 3000,
     'httpsPort': 3001,
     'envName': 'staging',
     'hashingSecret': 'thisIsASecret',
-    'maxChecks': 5
+    'maxChecks': 5,
+    twilio
 };
 
 // Production environment
@@ -26,7 +33,8 @@ environments.production = {
     'httpsPort': 5001,
     'envName': 'production',
     'hashingSecret': 'thisIsAlsoASecret',
-    'maxChecks': 5
+    'maxChecks': 5,
+    twilio
 };
 
 // Determine which enviornment was passed as a command-line arg.

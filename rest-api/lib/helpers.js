@@ -4,6 +4,9 @@
 
 // Dependencies.
 const crypto = require('crypto');
+const querystring = require('querystring');
+// http and https modules do not work only to start a server, but also the functions for server communication.
+const https = require('https');
 
 const config = require('../config');
 
@@ -51,6 +54,68 @@ helpers.createRandomString = function(len) {
         return str;
     } else
         return false;
+}
+
+// Send an SMS message via Twilio.
+helpers.sendTwilioSms = function(phone, msg, callback) {
+    // Validate the params.
+    phone = typeof(phone) == 'string' && phone.trim().length > 5 ? phone.trim() : false;
+
+    // 1600 is the max length supported by Twilio.
+    msg = typeof(msg) == 'string' && msg.trim().length > 0 && msg.trim().length < 1600 ? msg.trim(): false;
+
+    if(phone && msg) {
+        // Configure the request payload
+        let payload = {
+            'From': config.twilio.fromPhone,
+            'To': '+86'+phone,
+            'Body': msg,
+        };
+
+        // Stringify the payload.
+        let stringPayload = querystring.stringify(payload);
+
+        // Configure the request details.
+        let requestDetails = {
+            'protocol': 'https:',
+            'hstname': 'api.twilio.com',
+            'method': 'POST',
+            'path': '/2010-04-01/Accounts/'+config.twilio.accountSid+'/Messages.json',
+            'auth': config.twilio.accountSid+':'+config.twilio.authToken,
+            'headers': {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(stringPayload), // Buffer is globally available.
+            }
+        };
+
+        // Instantiate the request.
+        let req = https.request(requestDetails, function(res) {
+            // Grab the status first.
+            let status = res.statusCode;
+
+            // Call back original caller if success.
+            if(status === 200 || status === 201) {
+                callback(false);    // Success, no error.
+            } else {
+                callback('Status code retured was: '+status);
+            }
+        });
+
+        // Bind to the error event so it does not get thrown.
+        req.on('error', function(e) {
+            callback(e);
+        });
+
+        // Add the payload.
+        req.write(stringPayload);
+
+        // End the request - It will send it off.
+        req.end();
+
+    } else {
+        callback(new Error('Given parameters were missing or invalid'));
+    }
+
 }
 
 // Exports.
