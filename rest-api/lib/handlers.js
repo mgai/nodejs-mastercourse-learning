@@ -128,7 +128,7 @@ handlers._users.get = function(data, callback) {
  */
 handlers._users.put = function(data, callback) {
     // Check the phone number is valid.
-    let phone = typeof(data.payload.phone) == 'string' && data.payload.phone.trim() > 5 ? data.payload.phone : false;
+    let phone = typeof(data.payload.phone) == 'string' && data.payload.phone.trim().length > 0 ? data.payload.phone : false;
 
     // Check for the optional fields.
     let firstName = typeof(data.payload.firstName) == 'string' && data.payload.firstName.trim().length > 0 ? data.payload.firstName.trim() : false;
@@ -184,7 +184,7 @@ handlers._users.put = function(data, callback) {
  */
 handlers._users.delete = function(data, callback) {
     // Check the phone number is valid.
-    let phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length > 5 ? data.queryStringObject.phone : false;
+    let phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length > 0 ? data.queryStringObject.phone : false;
     if(phone) {
         // Get the token from the headers.
         let token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
@@ -198,8 +198,33 @@ handlers._users.delete = function(data, callback) {
         
                         _data.delete('users', phone, function(err){
                             if(!err) {
-                                // Return deleted user record.
-                                callback(200, data);
+                                let checks = typeof(data.checks) == 'object' && data.checks instanceof Array ? data.checks : false;
+                                if(checks.length > 0) {
+                                    // Counters for the async calls.
+                                    let checksDeleted = 0;
+                                    let checkDeletionError = false;
+                                    for(let i=0, j=checks.length; i<j; i++) {
+                                        _data.delete('checks', checks[0], function(err){
+                                            if(err) {
+                                                checkDeletionError = true;
+                                            }
+                                            checksDeleted++;
+                                            // The following comparison is critical.
+                                            // It makes use of the racing condition, so we work
+                                            // only when it's the last one!
+                                            if(checksDeleted == j) {
+                                                if(checkDeletionError) {
+                                                    callback(500, {'Error': 'Failed to delete attached checks.'});
+                                                } else {
+                                                    callback(200, data);
+                                                }
+                                            }
+                                        })
+                                    }
+                                } else {
+                                    // Return deleted user record.
+                                    callback(200, data);
+                                }
                             } else {
                                 callback(500, {'Error':'Could not delete the specified user.'});
                             }

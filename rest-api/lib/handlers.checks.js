@@ -126,16 +126,99 @@ checkHandler.put = function(data, callback) {
     // % 1 === 0 -> To check it's a whole number.
     let timeoutSeconds = typeof(data.payload.timeoutSeconds) == 'number' && data.payload.timeoutSeconds % 1 === 0 && data.payload.timeoutSeconds >=1 && data.payload.timeoutSeconds <=5 ? data.payload.timeoutSeconds : false;
 
-    _data.read('checks', id, function(err, check) {
-        if(!err && check) {
-            let token = typeof(data.headers.token) == 'string' && data.headers.token.trim().length == 20 ? data.headers.token.trim() : false;
-
+    if(id) {
+        // At least one must be provided.
+        if(protocol||url||method||successCodes) {
+            _data.read('checks', id, function(err, check) {
+                if(!err && check) {
+                    let token = typeof(data.headers.token) == 'string' && data.headers.token.trim().length == 20 ? data.headers.token.trim() : false;
+                    _tokens.verifyToken(token, check.userPhone, function(tokenIsValid) {
+                        if(tokenIsValid) {
+                            // Update the check where necessary.
+                            if(protocol) check.protocol = protocol;
+                            if(url) check.url = url;
+                            if(method) check.method = smethod;
+                            if(successCodes) check.successCodes = successCodes;
+                            if(timeoutSeconds) check.timeoutSeconds = timeoutSeconds;
+                            _data.update('checks', id, check, function(err) {
+                                if(!err) {
+                                    callback(200);
+                                } else {
+                                    callback(500, {'Error': 'Failed to update check.'});
+                                }
+                            })
+                        } else {
+                            callback(403);
+                        }
+                    })
+                } else {
+                    callback(400, {'Error': 'Check ID does not exist.'});
+                }
+            });
         } else {
-            callback(403);
+            callback(400, {'Error': 'Missing fields to update.'})
         }
-    });
+    } else {
+        callback(400, {'Error': 'Missing requried field.'});
+    }
 
 };
+
+/**
+ * Checks delete - Delete the check by ID.
+ * @requires {id} in the payload.
+ * @requires {token} in the header for authentication.
+ */
+
+ checkHandler.delete = function(data, callback) {
+    let id = typeof(data.queryStringObject.id) == 'string' && data.queryStringObject.id.trim().length == 20 ? data.queryStringObject.id : false;
+    if(id) {
+        _data.read('checks', id, function(err, check){
+            if(!err && check) {
+                let token = typeof(data.headers.token) == 'string' && data.headers.token.trim().length == 20 ? data.headers.token.trim() : false;
+                _tokens.verifyToken(token, check.userPhone, function(tokenIsValid) {
+                    if(tokenIsValid) {
+                        _data.delete('checks', id, function(err) {
+                            if(!err) {
+                                // Update the user to get rid of the reference.
+                                _data.read('users', check.userPhone, function(err, user) {
+                                    if(!err && user) {
+                                        let checks = typeof(user.checks) == 'object' && user.checks instanceof Array ? user.checks : [];
+                                        // Remove the deleted check.
+                                        let position = checks.indexOf(id);
+                                        if (position > -1) {
+                                            checks.splice(position, 1);
+                                            // Here we do not need to assign back the checks, as array are passed by reference. Any modification will then be effective to the source.
+                                            _data.update('users', check.userPhone, user, function(err){
+                                                if(!err) {
+                                                    callback(200, check);
+                                                } else {
+                                                    callback(500, {'Error': 'Could not delete the check.'});
+                                                }
+                                            });
+                                        } else {
+                                            callback(500, {'Error': 'Could not find the check in the user checkes list.'});
+                                        }
+                                    } else {
+                                        callback(500, {'Error': 'Failed to find the user who created the check.'});
+                                    }
+                                });
+                            } else {
+                                callback(500, {'Error': 'Failed to delete the check.'});
+                            }
+                        });
+                    } else {
+                        callback(403);
+                    }
+                });
+            } else {
+                callback(400, {'Error': 'Check ID does not exist.'})
+            }
+        })
+    } else {
+    callback(400, {'Error': 'Missing required fields.'});
+    }
+ }
 
 // Export.
 module.exports = checkHandler;
