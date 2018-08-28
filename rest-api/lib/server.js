@@ -10,6 +10,9 @@ const url = require('url');
 const fs = require('fs');
 const StringDecoder = require('string_decoder').StringDecoder;
 
+const util = require('util');
+const debug = util.debuglog('server');
+
 const config = require('./config'); // Default to load `config.js`.
 const _data = require('./data');    // require data.js
 const handlers = require('./handlers');
@@ -76,11 +79,17 @@ server.unifiedServer = function(req, res) {
             res.end(payloadString);
 
             // Log the requests.
-            console.log(`Request received on path: ${trimmedPath} with ${method}`);
-            console.log('Query String Object: ', queryStringObject);
-            console.log('Request received with headers:', headers);
-            console.log('Payload: ', buffer);
-            console.log('Response Returned: ', statusCode, payloadString);
+            // If the response is 200, print green. Otherwise red.
+            if(statusCode == 200) {
+                debug('\x1b[32m%s\x1b[0m', method.toUpperCase() + ' /' + trimmedPath + ' ' + statusCode);
+            } else {
+                debug('\x1b[31m%s\x1b[0m', method.toUpperCase() + ' /' + trimmedPath + ' ' + statusCode);
+            }
+            debug(`Request received on path: ${trimmedPath} with ${method}`);
+            debug('Query String Object: ', queryStringObject);
+            debug('Request received with headers:', headers);
+            debug('Payload: ', buffer);
+            debug('Response Returned: ', statusCode, payloadString);
         });
     });
 };
@@ -108,12 +117,13 @@ server.router = {
 server.init = function() {
     // Start the server, and have it listen on the port 3000.
     server.httpServer.listen(config.httpPort, function(){
-        console.log(`The server is listening on port ${config.httpPort} now in ${config.envName} mode.`);
+        // Send to console log in Color.
+        console.log('\x1b[36m%s\x1b[0m', `The server is listening on port ${config.httpPort} now in ${config.envName} mode.`);
     });
 
     // Start the HTTPS server.
     server.httpsServer.listen(config.httpsPort, function(){
-        console.log(`The server is listening on port ${config.httpsPort} now in ${config.envName} mode.`);
+        console.log('\x1b[35m%s\x1b[0m', `The server is listening on port ${config.httpsPort} now in ${config.envName} mode.`);
     });
 }
 

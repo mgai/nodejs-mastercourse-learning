@@ -102,3 +102,27 @@ undefined
     3. `req.end()` will **send** the request out.
 
 To ignore the self signed cert error - `process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"`
+
+#### Logging tips
+
+```javascript
+    // Send to console log in YELLOW.
+    console.log('\x1b[33m%s]\x1b[0m', 'Background workers are running');
+```
+
+`NODE_DEBUG=module1,module2` would turn on the DEBUG info for many node modules. Use **Comma seperated format**.
+
+We really do not need to rely sole only on `console.log`, as the proper way is to leverage the debug functionality.
+
+```javascript
+const util = require('util');
+const debug = util.debuglog('workers'); // This would turn on DEBUG when NODE_DEBUG=workers
+
+debug(...);   // Usage same as console.log
+```
+
+It would ouput -
+
+```
+WORKERS *PID*: ....
+```
