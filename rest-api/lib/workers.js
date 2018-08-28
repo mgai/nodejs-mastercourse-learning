@@ -12,6 +12,7 @@ const url = require('url');
 
 const helpers = require('./helpers');
 const _data = require('./data');
+const _logs = require('./logs');
 
 // General container.
 const workers = {};
@@ -155,8 +156,12 @@ workers.processCheckOutcome = function(originalCheckData, checkOutcome) {
     // originalCheckData.state !== state - To confirm a state change, which is the meaning of the alert.
     let alertWarranted = originalCheckData.lastChecked && originalCheckData.state !== state ? true : false;
 
+    // Common for logging and actual check data.
+    let timeOfCheck = Date.now();
+
     // Update the check data.
-    let newCheckData = {...originalCheckData, state, 'lastChecked': Date.now()};
+    let newCheckData = {...originalCheckData, state, 'lastChecked': timeOfCheck};
+    workers.log(originalCheckData, checkOutcome, state, alertWarranted, timeOfCheck);
 
     // Save the updates.
     _data.update('checks', newCheckData.id, newCheckData, function(err){
@@ -185,6 +190,74 @@ workers.alertUserToStatusChange = function(newCheckData) {
         }
     })
 };
+
+/**
+ * Internal helper function for logging.
+ * @param originalCheckData 
+ * @param checkOutcome 
+ * @param state 
+ * @param alertWarranted 
+ * @param timeOfCheck 
+ */
+workers.log = function(originalCheckData, checkOutcome, state, alertWarranted, timeOfCheck) {
+    let logData = {
+        'check': originalCheckData,
+        'outcome': checkOutcome,
+        'state': state,
+        'alert': alertWarranted,
+        'time': timeOfCheck
+    };
+
+    let logString = JSON.stringify(logData);
+
+    // Determine the name of the log file.
+    let logFilename = originalCheckData.id;
+
+    // Append the log string to the file.
+    _logs.append(logFilename, logString, function(err) {
+        if(!err) {
+            console.log('Logging to file succeeded.');
+        } else {
+            console.log('Logging to file failed.');
+        }
+    })
+};
+
+// Rotate (compress) the log files.
+workers.rotateLogs = function() {
+    // List all the non-compressed log files.
+    _logs.list(false, function(err, logs) {
+        if(!err && logs && logs.length > 0) {
+            logs.forEach(function(e) {
+                // Compress the data to the different file.
+                let logId = e.replace('.log', '');  // strip the suffix.
+                let newFileId = logId + '-' + Date.now();
+                _logs.compress(logId, newFileId, function(err) {
+                    if(!err) {
+                        _logs.truncate(logId, function(err) {
+                            if(!err) {
+                                console.log('Success truncating log file.');
+                            } else {
+                                console.log('Error truncating log file.', err);
+                            }
+                        })
+                    } else {
+                        console.log('Error compressing one of the logs.', err);
+                    }
+                });
+            });
+        } else {
+            console.log('Error: could not find any logs to rotate.');
+        }
+    });
+}
+
+// Timer to execute the log rotation process once per day.
+workers.logRotationLoop = function() {
+    setInterval(function() {
+        workers.rotateLogs();
+    }, 1000* 60 * 60 * 24);
+}
 
 // Timer to execute the worker process once per minute.
 workers.loop = function() {

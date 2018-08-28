@@ -15,6 +15,12 @@ app.init = function() {
 
     // Start the workers.
     workers.init();
+
+    // Compress all the logs immediately.
+    workers.rotateLogs();
+
+    // Call the compression loop.
+    workers.logRotationLoop();
 };
 
 app.init();
