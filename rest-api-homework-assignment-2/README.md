@@ -12,7 +12,7 @@ A `user` has following information -
 
 ```javascript
 let user = {
-    'id': String,   // Unique ID for user identification.
+    'id': String,   // Unique ID for user identification., hashed email address.
     'name': String,
     'email': String,
     'address': String,

@@ -84,7 +84,7 @@ server.notfound = function(data, callback) {
 
 // TODO: Define the routers.
 server.router = {
-    // 'users': users,
+    'users': users.routing,
     'tokens': null,
     'items': null,
     'carts': null,

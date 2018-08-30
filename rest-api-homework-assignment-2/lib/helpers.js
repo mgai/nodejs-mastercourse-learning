@@ -54,6 +54,16 @@ helpers.hash = function(str) {
     }
 };
 
+helpers.md5 = function(str) {
+    str = helpers.validate(str, {type: 'string'});
+    if(str) {
+        return crypto.createHash('md5').update(str).digest('hex');
+    } else {
+        debug('Empty string received., skipping.');
+        return false;
+    }
+}
+
 /**
  * Generate random string for specified length.
  * Mainly used for Token name.
