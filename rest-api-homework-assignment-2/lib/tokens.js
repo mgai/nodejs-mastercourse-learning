@@ -66,6 +66,41 @@ tokens.post = (data, callback) => {
 }
 
 /**
+ * Token Hanlders. PUT to update the token - Renew.
+ * It will extend the token for one hour from now.
+ * Only the current valid token will be extended.
+ * @requires {id, extend}  
+ */
+tokens.put = (data, callback) => {
+    const id = helpers.validate(data.payload.id, {type: 'string'});
+    const extend = helpers.validate(daya.payload.extend, {type: 'boolean'});
+
+    if(id && extend) {
+        _data.read('tokens', id, (err, token) => {
+            if(!err && token) {
+                if(token.expires > Date.now()) {
+                    token.expires = Date.now() + 1000 * 3600;
+                    _data.update('tokens', id, token, err => {
+                        if(!err) {
+                            callback(200, token);
+                        } else {
+                            debug('Failed to extend token - ', err);
+                            callback(500, {'Error': 'Failed to extend the token.'});
+                        }
+                    })
+                } else {
+                    callback(400, {'Error': 'Token has already expired.'});
+                }
+            } else {
+                callback(400, {'Error': 'Token does not exist.'});
+            }
+        })
+    } else {
+        callback(400, {'Error': 'Missing required field(s) or invalid.'});
+    }
+}
+
+/**
  * Check if the provided token is valid for the user.
  * @param {tokenId, userId}
  * @param callback (200 when valid, 400/404 otherwise.)
@@ -89,6 +124,22 @@ tokens.validate = function({tokenId, userId}, callback) {
     } else {
         debug('Invalid token ID(s) received for validation check.', tokenId, userId);
         callback(400, {'Error': 'Missing or invalid fields.'});
+    }
+}
+
+tokens.delete = (data, callback) {
+    const id = helpers.validate(data.queryStringObject.id, {type: 'string'});
+    if(id) {
+        _data.read('tokens', id, (err, data) => {
+            _data.delete('tokens', id, err => {
+                if(!err) {
+                    callback(200);
+                } else {
+                    debug('Failed to delete token - ', error);
+                    callback(500, {'Error': 'Could not delete the token specified.'})
+                }
+            })
+        });
     }
 }
 

@@ -17,6 +17,7 @@ const config = require('./config');
 const helpers = require('./helpers');
 
 const users = require('./users');
+const tokens = require('./tokens');
 
 // Server container.
 const server = {};
@@ -85,7 +86,7 @@ server.notfound = function(data, callback) {
 // TODO: Define the routers.
 server.router = {
     'users': users.routing,
-    'tokens': null,
+    'tokens': tokens.routing,
     'items': null,
     'carts': null,
     'notfound': server.notfound
