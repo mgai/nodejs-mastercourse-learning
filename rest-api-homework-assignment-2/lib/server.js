@@ -18,6 +18,7 @@ const helpers = require('./helpers');
 
 const users = require('./users');
 const tokens = require('./tokens');
+const items = require('./items');
 
 // Server container.
 const server = {};
@@ -49,6 +50,9 @@ server.unifiedServer = function(req, res) {
             trimmedPath, queryStringObject, method, headers,
             'payload': helpers.parseJsonToObject(buffer)
         };
+
+        debug(data);
+        
         // Routing.
         const chosenHandler = typeof(server.router[trimmedPath]) !== 'undefined' ? server.router[trimmedPath] : server.router.notfound;
 
@@ -62,6 +66,8 @@ server.unifiedServer = function(req, res) {
             res.setHeader('Content-Type', 'application/json'); // Returns JSON.
             res.writeHead(statusCode);
             res.end(payloadString);
+
+            debug(statusCode, payload);
 
             // TODO: Logging.
         });
@@ -87,7 +93,7 @@ server.notfound = function(data, callback) {
 server.router = {
     'users': users.routing,
     'tokens': tokens.routing,
-    'items': null,
+    'items': items.routing,
     'carts': null,
     'notfound': server.notfound
 };
