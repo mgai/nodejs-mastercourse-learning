@@ -20,10 +20,10 @@ let user = {
 }
 ```
 
-A `user` could perform `user.logIn()` and `user.logOut()` by means of `Token`.
+A `user` could perform `Log In` and `Log Out` by means of `Token`.
 
-* `user.logIn()` would `create` a `Token` with `POST /tokens`
-* `user.logOut()` would `delete` a `Token` with `DELETE /tokens?id`
+* `Log In` would `create` a `Token` with `POST /tokens`
+* `Log Out` would `delete` a `Token` with `DELETE /tokens?id`
 
 Once logged in, the `user` could:
 

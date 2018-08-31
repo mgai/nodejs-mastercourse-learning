@@ -73,7 +73,7 @@ tokens.post = (data, callback) => {
  */
 tokens.put = (data, callback) => {
     const id = helpers.validate(data.payload.id, {type: 'string'});
-    const extend = helpers.validate(daya.payload.extend, {type: 'boolean'});
+    const extend = helpers.validate(data.payload.extend, {type: 'boolean'});
 
     if(id && extend) {
         _data.read('tokens', id, (err, token) => {
@@ -127,7 +127,7 @@ tokens.validate = function({tokenId, userId}, callback) {
     }
 }
 
-tokens.delete = (data, callback) {
+tokens.delete = (data, callback) => {
     const id = helpers.validate(data.queryStringObject.id, {type: 'string'});
     if(id) {
         _data.read('tokens', id, (err, data) => {
