@@ -24,7 +24,7 @@ function auth(data, handler, callback) {
                     // Authentication passed. Passing to actual handler.
                     handler(data, callback);
                 } else {
-                    callback()
+                    callback(403); // 403 Forbidden.
                 }
             });
         } else {
@@ -34,4 +34,24 @@ function auth(data, handler, callback) {
     } else {
         callback(401, {'Error': 'Auth - Email and Token must be present.'});  // 401 Unauthorized.
     }
+};
+
+function withUserId(data, handler, callback) {
+    const email = helpers.validate(data.queryStringObject.email, {type:'string'});
+    if(email) {
+        const userId = helpers.md5(email);
+        if(userId) {
+            data.payload.userId = userId; // Append userId.
+            handler(data, callback);
+        } else {
+            callback(500, {'Error': 'Failed to compute user ID.'});
+        }
+    } else {
+        callback(400, {'Error': 'Missing required field(s).', 'Extra': 'Email shoudl be presend in queryStringObject.'});
+    }
+}
+
+module.exports = {
+    auth,
+    withUserId
 }

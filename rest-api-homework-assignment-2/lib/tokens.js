@@ -47,6 +47,7 @@ tokens.post = (data, callback) => {
                             if(!err) {
                                 callback(200, {...token, id});
                             } else {
+                                console.log(helpers.ansiColorString.RED, err)
                                 callback(500, {'Error': 'Failed to create token.'});
                             }
                         })
