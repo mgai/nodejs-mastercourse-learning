@@ -12,7 +12,7 @@ A `user` has following information -
 
 ```javascript
 let user = {
-    'id': String,   // Unique ID for user identification., hashed email address.
+    'id': String,   // md5 hash of email for data file name.
     'name': String,
     'email': String,
     'address': String,
@@ -30,6 +30,11 @@ Once logged in, the `user` could:
 * retrieve the full menu items via `GET /items`
 * fill a `cart` with `items` via `POST /carts`
 * place an `order` via `POST /orders` with integration of [Stripe.com Sandbox](https://stripe.com/docs/testing#cards)
+
+By definition of `logged In`, the following information should be present in the API call request - 
+
+1. `token` in the `header`, which contains the `token ID`.
+2. `email` in the `request query string`, which contains the `user email`, which then is used to compute the `user ID`.
 
 Once order is placed, `receipt` will be sent to the user via email, with integrationof [Mailgun.com sandbox](https://documentation.mailgun.com/en/latest/faqs.html#how-do-i-pick-a-domain-name-for-my-mailgun-account)
 
@@ -51,7 +56,7 @@ Logged in user would always present the granted token in the `req.headers`
 
 ### Menu Item
 
-For simplicity, menu items are hardcoded in `items.json`
+For simplicity, menu items are hardcoded in `all-items.json`
 
 ### Shopping Cart
 
@@ -65,7 +70,7 @@ The shopping card is defined as below -
 
 ```javascript
 const cart = {
-    'userId': String, // Implcitly as cartId.
+    'userId': String, // Implcitly as cartId, used for the file naming.
     'items' [{ 'itemId': String, 'quantity': Number}, ...]
 }
 ```

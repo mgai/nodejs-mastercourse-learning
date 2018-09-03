@@ -13,7 +13,7 @@ const withUserId = require('./auth').withUserId;
 // General container
 const carts = {};
 
-carts.get = function(data, callback) {
+carts.get = (data, callback) => {
   auth(data,() => {
     const email = helpers.validate(data.queryStringObject.email, {type: 'string'});
     if(email) {
@@ -35,10 +35,10 @@ carts.get = function(data, callback) {
   } ,callback);
 };
 
-carts.post = function(data, callback) {
+carts.post = (data, callback) => {
   auth(data, () => {
     withUserId(data, () => {
-      _data.read('carts', userId, (err, cart) => {
+      _data.read('carts', data.payload.userId, (err, cart) => {
         if(err) {
           /**
            * For simplicity, I am skipping validation check for items, but assume -
@@ -47,10 +47,40 @@ carts.post = function(data, callback) {
            */
           const cart = helpers.validate(data.payload.cart, {type: 'array'});
           if(cart) {
-            
+            _data.create('carts', data.payload.userId, cart, err => {
+              if(!err) {
+                callback(200);
+              } else {
+                debug(helpers.ansiColorString.RED, err)
+                callback(500, {'Error': 'Failed to save cart.'});
+              }
+            })
+          } else {
+            callback(400, {'Error': 'Missing require field(s).'});
           }
         } else {
           callback(400, {'Error': 'Cart already exist', cart});
+        }
+      });
+    }, callback);
+  }, callback);
+}
+
+carts.delete = (data, callback) => {
+  auth(data, () => {
+    withUserId(data, () => {
+      _data.read('carts', data.payload.userId, (err, cart) => {
+        if(!err && cart) {
+          _data.delete('carts', data.payload.userId, (err) => {
+            if(!err) {
+              callback(200);
+            } else {
+              debug(helpers.ansiColorString.RED, err);
+              callback(500, {'Error': 'Failed to delete cart.', 'Extra': err});
+            }
+          });
+        } else {
+          callback(404);
         }
       });
     }, callback);

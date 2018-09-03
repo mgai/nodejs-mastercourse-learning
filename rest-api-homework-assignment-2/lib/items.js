@@ -10,12 +10,20 @@ const helpers = require('./helpers');
 
 const items = {};
 
-items.fullList = [
-    {'id': 1, 'name': 'Cheesy Smiley', 'price': 9.99},
-    {'id': 2, 'name': 'Hot Spicy', 'price': 12.99},
-    {'id': 3, 'name': 'Meat Lover', 'price': 13.99},
-    {'id': 4, 'name': 'Classic', 'price': 11.99},
-];
+/**
+ * Place holder function to mimic the API call feeling,
+ * which currently directly retrieve the full list from
+ * the hard coded file all-items.json
+ * @param callback 
+ */
+items._getFullList = (callback) => {
+    const fullList = require('./all-items.json');
+    if(fullList) {
+        callback(false, fullList);
+    } else {
+        callback(new Error('Failed to retrieve the list.'));
+    }
+}
 
 items.get = (data, callback) => {
     const email = helpers.validate(data.queryStringObject.email, {type: 'string'});
@@ -26,7 +34,13 @@ items.get = (data, callback) => {
             if(userId) {
                 tokens.validate({tokenId, userId}, err => {
                     if(!err) {
-                        callback(200, items.fullList);
+                        items._getFullList((err, fullList) => {
+                            if(!err) {
+                                callback(200, fullList);
+                            } else {
+                                callback(500, {'Error': err.message});
+                            }
+                        })
                     } else {
                         callback(401, {'Error': 'Token is invalid.'});
                     }

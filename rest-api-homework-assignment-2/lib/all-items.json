@@ -1,0 +1,6 @@
+[
+    {"id": 1, "name": "Cheesy Smiley", "price": 9.99},
+    {"id": 2, "name": "Hot Spicy", "price": 12.99},
+    {"id": 3, "name": "Meat Lover", "price": 13.99},
+    {"id": 4, "name": "Classic", "price": 11.99}
+]
