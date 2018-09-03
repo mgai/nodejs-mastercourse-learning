@@ -20,6 +20,7 @@ const users = require('./users');
 const tokens = require('./tokens');
 const items = require('./items');
 const carts = require('./carts');
+const orders = require('./orders');
 
 // Server container.
 const server = {};
@@ -96,7 +97,7 @@ server.router = {
     'tokens': tokens.routing,
     'items': items.routing,
     'carts': carts.routing,
-    'orders': server.notfound,
+    'orders': orders.routing,
     'notfound': server.notfound
 };
 

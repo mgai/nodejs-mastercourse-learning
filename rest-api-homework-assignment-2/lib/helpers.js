@@ -6,6 +6,8 @@
 // Dependencies
 const debug = require('util').debuglog('helpers');
 const crypto = require('crypto');
+const https = require('https');
+const querystring = require('querystring');
 
 // Container
 const helpers = {};
@@ -105,6 +107,54 @@ helpers.validate = function(data, {type, length=0}) {
             return false;
     }
 }
+
+/**
+ * Psuedo order price calculator.
+ * For simplicity, let's return a fixed number - say $28.83.
+ */
+
+helpers.calculateOrderPrice = order => 2883;    // In Stripe minimum currency unit.
+
+/**
+ * Charge user credit card via Stripe
+ * @param card Psuedo credit card info.
+ * @param order order to charge.
+ * @param callback callback(err)
+ */
+helpers.charge = function(card, order, callback) {
+    const requestDetails = {
+        protocol: 'https',
+        hostname: 'api.stripe.com',
+        method: 'POST',
+        path: '/v1/charges',
+        auth: 'sk_test_4eC39HqLyjWDarjtT1zdp7dc:'
+    };
+
+    const payload = {
+        amount: helpers.calculateOrderPrice(order),
+        currency: 'usd',    // Assume USD for simplicity.
+        description: 'Pizza order bill',
+        source: 'tok_visa'
+    };
+
+    const stringPayload = querystring.stringify(payload);
+
+    // Instantiate the request.
+    const req = https.request(requestDetails, res => {
+        const status = res.statusCode;
+
+        if(status === 200 || status === 201) {
+            callback(false);    // Success, no error.
+        } else {
+            callback(status);
+        }
+    });
+
+    req.on('error', callback);
+
+    req.write(stringPayload);
+    req.end(()=> callback(false));
+};
 
 // Export
 module.exports = helpers;
