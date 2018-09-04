@@ -24,12 +24,24 @@ orders.post = (data, callback) => {
         _data.create(['orders', data.payload.userId].join(path.sep), helpers.createRandomString(20), order, err => {
           if(!err) {
             // 1. Charge the user via stripe.
-            const card = helpers.validate(daya.payload.order, {type: 'object'});
+            const card = helpers.validate(data.payload.card, {type: 'object'});
             if(card) {
               helpers.charge(card, order, err => {
                 if(!err) {
-                  // TODO: 2. Send out receipt via email.
-                  callback(200);
+                  _data.read('users', data.payload.userId, (err, user) =>{
+                      if(!err && user) {
+                          helpers.sendInvoice(user, order, (err) => {
+                              if(!err) {
+                                  callback(200);
+                              } else {
+                                  debug(helpers.ansiColorString.CYAN, err);
+                                  callback(500, {'Error': 'Error sending email.'})
+                              }
+                          })
+                      } else {
+                          callback(500, {'Error': 'Failed to retrieve user record'});
+                      }
+                  });
                 }
               })
             } else {

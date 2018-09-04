@@ -7,6 +7,7 @@
 // Dependecies
 const fs = require('fs');
 const path = require('path');
+const debug = require('util').debuglog('data');
 
 const helpers = require('./helpers');
 
@@ -24,6 +25,13 @@ lib.baseDir = path.join(__dirname, '/../.data');    // Construct the absolute pa
  * @param callback callback(err) pattern - false means no error.
  */
 lib.create = function(dir, file, data, callback) {
+    try {
+        fs.statSync([lib.baseDir, dir].join(path.sep));
+    } catch(e) {
+        if(e.code =='ENOENT') {
+            lib.makeFullDir(dir);
+        }
+    }
     fs.open([lib.baseDir,dir,file].join(path.sep) + '.json', 'wx', function(err, fd){
         if (!err && fd) {
             // Convert data to string.
@@ -47,6 +55,34 @@ lib.create = function(dir, file, data, callback) {
         }
     });
 };
+
+/**
+ * Create directory if not exist.
+ * @param dir the path under lib.baseDir.
+ */
+lib.makeFullDir = function(dir) {
+    debug(helpers.ansiColorString.CYAN, 'Creating the dir with makeFullDir', dir);
+    if(dir.indexOf(path.sep) == 0) {    // Strip path.sep from the beginning.
+        dir = dir.replace(path.sep, '');
+    }
+
+    debug(helpers.ansiColorString.CYAN, dir.split(path.sep));
+    dir.split(path.sep).reduce((acc, cur) => {
+        try {
+            debug(helpers.ansiColorString.CYAN, 'testing ', acc + path.sep + cur);
+            fs.statSync(acc + path.sep + cur)
+        } 
+        catch (e) {
+            debug(helpers.ansiColorString.CYAN, e);
+            if (e.code === 'ENOENT') {
+                debug(helpers.ansiColorString.CYAN, acc);
+                fs.mkdirSync(acc + path.sep + cur);
+            }
+        }
+
+        return acc + path.sep + cur;
+    }, lib.baseDir);
+}
 
 // Read data from a file, and then return the parsed JSON Object.
 lib.read = function(dir, file, callback) {

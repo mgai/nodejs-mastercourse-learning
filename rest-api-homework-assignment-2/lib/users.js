@@ -73,6 +73,9 @@ users.get = function(data, callback) {
         } else {
             callback(500, {'Error': 'Failed to compute user ID.'});
         }
+    } else {
+        debug(helpers.ansiColorString.YELLOW, 'Email not found in queryStringObject.');
+        callback(400, {'Error': 'Missing required field(s).'});
     }
 }
 

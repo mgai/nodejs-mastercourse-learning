@@ -103,6 +103,8 @@ helpers.validate = function(data, {type, length=0}) {
             return typeof(data) === 'string' && data.trim().length > length ? data.trim() : false;
         case 'array':
             return typeof(data) === 'object' && data instanceof Array && data.length > 0 ? data : [];
+        case 'object':
+            return typeof(data) === 'object' ? data : false;
         default:
             return false;
     }
@@ -123,7 +125,7 @@ helpers.calculateOrderPrice = order => 2883;    // In Stripe minimum currency un
  */
 helpers.charge = function(card, order, callback) {
     const requestDetails = {
-        protocol: 'https',
+        protocol: 'https:',
         hostname: 'api.stripe.com',
         method: 'POST',
         path: '/v1/charges',
@@ -144,6 +146,7 @@ helpers.charge = function(card, order, callback) {
         const status = res.statusCode;
 
         if(status === 200 || status === 201) {
+            debug(helpers.ansiColorString.GREEN, 'Charge sent');
             callback(false);    // Success, no error.
         } else {
             callback(status);
@@ -153,7 +156,66 @@ helpers.charge = function(card, order, callback) {
     req.on('error', callback);
 
     req.write(stringPayload);
-    req.end(()=> callback(false));
+    req.end();
+};
+
+/**
+ * Build the Invoice Email content.
+ * TODO: Make it nice...
+ * @param order 
+ */
+helpers.buildInvoiceEmail = function(order) {
+    return JSON.stringify(order);
+}
+
+/**
+ * Send Invoice to user via email.
+ * @param user for email.
+ * @param order order for invoice generation
+ * @param callback callback(err)
+ */
+helpers.sendInvoice = function(user, order, callback) {
+    const requestDetails = {
+        protocol: 'https:',
+        hostname: 'api.mailgun.net',
+        method: 'POST',
+        path: '/v3/sandbox807d0c62555d4036914bed63fcbdfa93.mailgun.org/messages',
+        auth: 'api:4332d91e697e30c5b60430cbfba827ae-f45b080f-ec41e890'
+    };
+
+    const payload = {
+        from: 'Mailgun Sandbox <postmaster@sandbox807d0c62555d4036914bed63fcbdfa93.mailgun.org>',
+        to: user.email,
+        subject: 'Invoice from Pizza shop',
+        text: helpers.buildInvoiceEmail(order)
+    };
+
+    debug(helpers.ansiColorString.CYAN, JSON.stringify(payload));
+
+
+    const stringPayload = querystring.stringify(payload);
+    debug(helpers.ansiColorString.CYAN, stringPayload);
+
+    // Instantiate the request.
+    const req = https.request(requestDetails, res => {
+        const status = res.statusCode;
+
+        if(status === 200 || status === 201) {
+            debug(helpers.ansiColorString.GREEN, 'Invoice sent.');
+            callback(false);    // Success, no error.
+        } 
+        else {
+            callback(status);
+        }
+    });
+
+    req.on('error', (err) => {
+        debug(helpers.ansiColorString.CYAN, err);
+        callback(err);
+    });
+
+    req.write(stringPayload);
+    req.end();
 };
 
 // Export
