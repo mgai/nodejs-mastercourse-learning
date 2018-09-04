@@ -192,9 +192,12 @@ helpers.sendInvoice = function(user, order, callback) {
 
     debug(helpers.ansiColorString.CYAN, JSON.stringify(payload));
 
-
     const stringPayload = querystring.stringify(payload);
-    debug(helpers.ansiColorString.CYAN, stringPayload);
+
+    requestDetails.headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(stringPayload)
+    };
 
     // Instantiate the request.
     const req = https.request(requestDetails, res => {
