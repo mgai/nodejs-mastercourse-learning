@@ -3,6 +3,7 @@
  */
 
 // Dependencies
+const debug = require('util').debuglog('handlers');
 const _data = require('./data');
 const helpers = require('./helpers');
 
@@ -11,6 +12,26 @@ const checkHandlers = require('./handlers.checks');
 
 // Define the handlers.
 const handlers = {};
+
+/**
+ * HTML Handlers.
+ */
+handlers.index = function(data, callback) {
+    // Handle only GET method.
+    if(data.method === 'get') {
+        // Read in a template as a string.
+        helpers.getTemplate('index', function(err, str) {
+            if(!err && str) {
+                debug(str);
+                callback(200, str, 'html');
+            } else {
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');   // 405 - Not allowed.
+    }
+}
 
 handlers._tokens = tokenHandlers;
 handlers._checks = checkHandlers;

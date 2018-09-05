@@ -63,18 +63,28 @@ server.unifiedServer = function(req, res) {
         };
 
         // Route the request to the handler specified.
-        chosenHandler(data, function(statusCode, payload){
+        // contentType - whether JSON or HTML page.
+        chosenHandler(data, function(statusCode, payload, contentType){
+            // Default content type to JSON.
+            contentType = typeof(contentType) == 'string' ? contentType : 'json';
+
             // Use the status code called back by the handler, or default to 200.
             statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
 
-            // Use the payload called back by the handler, or default to empty object.
-            payload = typeof(payload) == 'object' ? payload : {};
+            // Return the response parts that are content specific.
+            let payloadString = '';
+            if (contentType === 'json') {
+                res.setHeader('Content-Type', 'application/json');  // Inform client we are sending JSON.
+                // Use the payload called back by the handler, or default to empty object.
+                payload = typeof(payload) == 'object' ? payload : {};
+                // Convert the payload to a string.
+                payloadString = JSON.stringify(payload);
+            } else if (contentType === 'html') {
+                res.setHeader('Content-Type', 'text/html');  // Inform client we are sending HTML.
+                payloadString = typeof(payload) == 'string' ? payload : '';
+            }
 
-            // Convert the payload to a string.
-            let payloadString = JSON.stringify(payload);
-
-            // Return the response.
-            res.setHeader('Content-Type', 'application/json');  // Inform client we are sending JSON.
+            // Return the content parts that are common to all.
             res.writeHead(statusCode);
             res.end(payloadString);
 
@@ -106,12 +116,21 @@ server.httpsServer = https.createServer(server.httpsServerOptions, server.unifie
 
 // Define a request router.
 server.router = {
+    '': handlers.index, // handles the root.
+    'account/create': handlers.accountCreate,   // Serve HTML page for sign up.
+    'account/edit': handlers.accountEdit,   // Delete will be added as a button here.
+    'account/deleted': handlers.accountDeleted, // After deletion, the deleted page should be shown.
+    'session/create':  handlers.sessionCreate, // Login form. 
+    'session/deleted': handlers.sessionDeleted,
+    'checks/all': handlers.checksList,   // Protected, logged in.
+    'checks/create': handlers.checksCreate,
+    'checks/edit':  handlers.checksEdit,
     'sample': handlers.sample,
     'ping': handlers.ping,
     'hello': handlers.hello,
-    'users': handlers.users,
-    'tokens': handlers.tokens,
-    'checks': handlers.checks
+    'api/users': handlers.users,
+    'api/tokens': handlers.tokens,
+    'api/checks': handlers.checks
 };
 
 server.init = function() {

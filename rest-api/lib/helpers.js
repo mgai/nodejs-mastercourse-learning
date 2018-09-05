@@ -3,8 +3,11 @@
  */
 
 // Dependencies.
+const fs = require('fs');
+const path = require('path');
 const crypto = require('crypto');
 const querystring = require('querystring');
+const debug = require('util').debuglog('helpers');
 // http and https modules do not work only to start a server, but also the functions for server communication.
 const https = require('https');
 
@@ -116,6 +119,28 @@ helpers.sendTwilioSms = function(phone, msg, callback) {
         callback(new Error('Given parameters were missing or invalid'));
     }
 
+}
+
+/**
+ * Get the string content of a template.
+ * @param templateName 
+ * @param callback(err, templateStr) 
+ */
+helpers.getTemplate = function(templateName, callback) {
+    templateName = typeof(templateName) == 'string' && templateName.length > 0 ? templateName : false;
+    if(templateName) {
+        const templatesDir = path.join(__dirname, '/../templates/');
+        fs.readFile(templatesDir + templateName + '.html', 'utf8', function(err, str) {
+            if(!err && str) {
+                callback(false, str);
+            } else {
+                debug(err);
+                callback('No template could be found');
+            }
+        });
+    } else {
+        callback('A valid template name was not specified.');
+    }
 }
 
 // Exports.
