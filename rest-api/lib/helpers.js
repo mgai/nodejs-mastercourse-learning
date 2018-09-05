@@ -126,13 +126,17 @@ helpers.sendTwilioSms = function(phone, msg, callback) {
  * @param templateName 
  * @param callback(err, templateStr) 
  */
-helpers.getTemplate = function(templateName, callback) {
+helpers.getTemplate = function(templateName, data, callback) {
     templateName = typeof(templateName) == 'string' && templateName.length > 0 ? templateName : false;
+    data = typeof(data) == 'object' && data !== null ? data : {};
+
     if(templateName) {
         const templatesDir = path.join(__dirname, '/../templates/');
         fs.readFile(templatesDir + templateName + '.html', 'utf8', function(err, str) {
-            if(!err && str) {
-                callback(false, str);
+            if(!err && str && str.length > 0) {
+                // Do interpolation on the string.
+                let finalString = helpers.interpolate(str, data);
+                callback(false, finalString);
             } else {
                 debug(err);
                 callback('No template could be found');
@@ -141,6 +145,46 @@ helpers.getTemplate = function(templateName, callback) {
     } else {
         callback('A valid template name was not specified.');
     }
+};
+
+/**
+ * Add the universal header and footer to a string (template),
+ * pass the provided data object to the header and footer for interpolation. 
+ */
+helpers.addUniversalTemplates = function(str, data, callback) {
+    str = typeof(str) == 'string' && str.length > 0 ? str : '';
+    data = typeof(data) == 'object' && data !== null ? data : {};
+
+    // TODO: Continue here.
+}
+
+/**
+ * Take a given string and a data object, find/replace all the keys.
+ * @param str The string for content to be replaced in.
+ * @param data The data to be replaced INTO the str.
+ */
+helpers.interpolate = function(str, data) {
+    str = typeof(str) == 'string' && str.length > 0 ? str : '';
+    data = typeof(data) == 'object' && data !== null ? data : {};
+
+    // Add the template globals to the data object.
+    // prepending their key name with "global".
+    for(let keyName in config.templateGLobals) {
+        if(config.templateGLobals.hasOwnProperty(keyName)) {
+            // We are not adding the global as an object, but rather a hard coded top level var.
+            data['global.'+keyName] = config.templateGLobals[keyName];
+        }
+    };
+
+    // For each key in the data object, insert its value into the string at the place.
+    for(let key in data) {
+        if(data.hasOwnProperty(key) && typeof(data[key]) == 'string') {
+            let replace = data[key];
+            let find = '{' + key + '}';
+            str = str.replace(find, replace);
+        }
+    }
+
 }
 
 // Exports.
