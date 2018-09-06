@@ -52,7 +52,11 @@ server.unifiedServer = function(req, res) {
         buffer += decoder.end();
 
         // Choose the handler this request should go to.
-        const chosenHandler = typeof(server.router[trimmedPath]) !== 'undefined' ? server.router[trimmedPath] : handlers.notFound;
+        let chosenHandler = typeof(server.router[trimmedPath]) !== 'undefined' ? server.router[trimmedPath] : handlers.notFound;
+        
+        // Here we need to enhance the handler for public, so that it supports wildcard 'public/*'.
+        chosenHandler = trimmedPath.indexOf('public/') > -1 ? handlers.public : chosenHandler;
+        
         // Construct the data object to send to the handler.
         const data = {
             trimmedPath,
@@ -82,6 +86,21 @@ server.unifiedServer = function(req, res) {
             } else if (contentType === 'html') {
                 res.setHeader('Content-Type', 'text/html');  // Inform client we are sending HTML.
                 payloadString = typeof(payload) == 'string' ? payload : '';
+            } else if (contentType === 'favicon') {
+                res.setHeader('Content-Type', 'image/x-icon');  // Inform client we are sending HTML.
+                payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            } else if (contentType === 'css') {
+                res.setHeader('Content-Type', 'text/css');  // Inform client we are sending HTML.
+                payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            } else if (contentType === 'png') {
+                res.setHeader('Content-Type', 'image/png');  // Inform client we are sending HTML.
+                payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            } else if (contentType === 'jpg') {
+                res.setHeader('Content-Type', 'image/jpeg');  // Inform client we are sending HTML.
+                payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            } else if (contentType === 'plain') {
+                res.setHeader('Content-Type', 'text/plain');  // Inform client we are sending HTML.
+                payloadString = typeof(payload) !== 'undefined' ? payload : '';
             }
 
             // Return the content parts that are common to all.
@@ -130,7 +149,9 @@ server.router = {
     'hello': handlers.hello,
     'api/users': handlers.users,
     'api/tokens': handlers.tokens,
-    'api/checks': handlers.checks
+    'api/checks': handlers.checks,
+    'favicon.ico': handlers.favicon,    // Serve the favicon from the baseUrl.
+    'public': handlers.public
 };
 
 server.init = function() {

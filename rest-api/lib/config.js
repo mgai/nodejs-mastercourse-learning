@@ -31,10 +31,12 @@ environments.staging = {
     'envName': 'staging',
     'hashingSecret': 'thisIsASecret',
     'maxChecks': 5,
-    twilio,
-    templateGlobals
+    twilio, // Here it's passed by reference.
+    templateGlobals: {
+        ...templateGlobals,
+        'baseUrl': 'http://localhost:3000/'
+    }
 };
-environments.staging.templateGlobals.baseUrl = 'http://localhost:' + environments.staging.httpPort + '/';
 
 // Production environment
 environments.production = {
@@ -43,10 +45,12 @@ environments.production = {
     'envName': 'production',
     'hashingSecret': 'thisIsAlsoASecret',
     'maxChecks': 5,
-    twilio,
-    templateGlobals
+    twilio, // Here it's passed by reference.
+    templateGlobals: {
+        ...templateGlobals,
+        'baseUrl': 'http://localhost:5000/'
+    }
 };
-environments.production.templateGlobals.baseUrl = 'http://localhost:' + environments.production.httpPort + '/';
 
 // Determine which enviornment was passed as a command-line arg.
 let currentEnvironment = typeof(process.env.NODE_ENV) == 'string' ? process.env.NODE_ENV.toLowerCase() : '';

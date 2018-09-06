@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <base href="{global.baseUrl}" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta http-equiv="content-language" content="en-us">
-    <base href="{global.baseUrl}" />
     <!-- Meta tags -->
     <title>{head.title} | {global.appName}</title>
     <meta name="description" content="{head.description}">
@@ -19,25 +19,25 @@
     <div class="wrapper">
     <!-- Header -->
     <div class="header">
-        <a class="logo" href="/"></a>
+        <a class="logo" href="/"><img src="public/logo.png" alt="Company Logo" /></a>
         <ul class="menu">
             <li>
                 <a href="/">Home</a>
             </li>
             <li>
-                <a class="loggedOut" href="/">Sign Up</a>
+                <a class="loggedOut" href="/account/create">Sign Up</a>
             </li>
             <li>
-                <a class="loggedOut" href="/">Log in</a>
+                <a class="loggedOut" href="/session/create">Log in</a>
             </li>
             <li>
-                <a class="loggedIn" href="/">Dashboard</a>
+                <a class="loggedIn" href="/checks/all">Dashboard</a>
             </li>
             <li>
-                <a class="loggedIn" href="/">Account Settings</a>
+                <a class="loggedIn" href="/account/edit">Account Settings</a>
             </li>
             <li>
-                <a class="loggedIn" href="/">Log out</a>
+                <a class="loggedIn" href="#">Log out</a>
             </li>
         </ul>
     </div>

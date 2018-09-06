@@ -48,6 +48,69 @@ handlers.index = function(data, callback) {
     }
 }
 
+/**
+ * Favicon handler.
+ * @param data the request object.
+ * @param callback (code, data, type)
+ */
+handlers.favicon = function(data, callback) {
+    if(data.method === 'get') {
+        // Read in the favicon data.
+        helpers.getStaticAsset('favicon.ico', function(err, data) {
+            if(!err && data) {
+                callback(200, data, 'favicon');
+            } else {
+                debug(err);
+                callback(500);
+            }
+        })
+    } else {
+        callback(405);  // Reject any other HTTP methods.
+    }
+}
+
+/**
+ * Public static asset handler.
+ * @param data the request object.
+ * @param callback (code, data, type)
+ */
+handlers.public = function(data, callback) {
+    if(data.method === 'get') {
+        // Read in the data.
+        let trimmedAssetName = data.trimmedPath.replace('public/', '').trim();
+        if(trimmedAssetName.length > 0) {
+            helpers.getStaticAsset(trimmedAssetName, function(err, data) {
+                if(!err && data) {
+                    // Determine the content type. (default to plain text).
+                    let contentType = 'plain';
+                    if(trimmedAssetName.indexOf('.css') > -1) {
+                        contentType = 'css';
+                    }
+                    if(trimmedAssetName.indexOf('.png') > -1) {
+                        contentType = 'png';
+                    }
+                    if(trimmedAssetName.indexOf('.jpg') > -1) {
+                        contentType = 'jpg';
+                    }
+                    if(trimmedAssetName.indexOf('.ico') > -1) {
+                        contentType = 'favicon';
+                    }
+
+                    callback(200, data, contentType);
+                } else {
+                    debug(err);
+                    callback(404);  // Not found.
+                }
+            })
+        } else {
+            callback(404);
+        }
+    } else {
+        callback(405);  // Reject any other HTTP methods.
+    }
+}
+
+
 handlers._tokens = tokenHandlers;
 handlers._checks = checkHandlers;
 
