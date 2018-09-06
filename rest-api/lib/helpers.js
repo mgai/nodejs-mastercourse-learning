@@ -123,7 +123,8 @@ helpers.sendTwilioSms = function(phone, msg, callback) {
 
 /**
  * Get the string content of a template.
- * @param templateName 
+ * @param templateName
+ * @param data The key-value pairs for variable replacement in the template.
  * @param callback(err, templateStr) 
  */
 helpers.getTemplate = function(templateName, data, callback) {
@@ -155,7 +156,24 @@ helpers.addUniversalTemplates = function(str, data, callback) {
     str = typeof(str) == 'string' && str.length > 0 ? str : '';
     data = typeof(data) == 'object' && data !== null ? data : {};
 
-    // TODO: Continue here.
+    // Get the header.
+    helpers.getTemplate('_header', data, function(err, headerString) {
+        if(!err && headerString) {
+            // Get the footer.
+            helpers.getTemplate('_footer', data, function(err, footerString){
+                if(!err && footerString) {
+                    const fullString = headerString + str + footerString;
+                    callback(false, fullString);
+                } else {
+                    debug(err);
+                    callback('Could not find the footer template');
+                }
+            })
+        } else {
+            debug(err);
+            callback('Could not find the header template');
+        }
+    });
 }
 
 /**
@@ -169,10 +187,10 @@ helpers.interpolate = function(str, data) {
 
     // Add the template globals to the data object.
     // prepending their key name with "global".
-    for(let keyName in config.templateGLobals) {
-        if(config.templateGLobals.hasOwnProperty(keyName)) {
+    for(let keyName in config.templateGlobals) {
+        if(config.templateGlobals.hasOwnProperty(keyName)) {
             // We are not adding the global as an object, but rather a hard coded top level var.
-            data['global.'+keyName] = config.templateGLobals[keyName];
+            data['global.'+keyName] = config.templateGlobals[keyName];
         }
     };
 
@@ -181,10 +199,15 @@ helpers.interpolate = function(str, data) {
         if(data.hasOwnProperty(key) && typeof(data[key]) == 'string') {
             let replace = data[key];
             let find = '{' + key + '}';
-            str = str.replace(find, replace);
+            // Single occurrence replacement with doing mere substr replacement.
+            // str = str.replace(find, replace); 
+            // For global replacement of every occurrence..
+            let rx = new RegExp(find, 'g'); 
+            str = str.replace(rx, replace);
         }
     }
 
+    return str;
 }
 
 // Exports.

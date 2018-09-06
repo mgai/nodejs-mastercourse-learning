@@ -15,7 +15,14 @@ twilio = {
     'accountSid': 'ACb32d411ad7fe886aac54c665d25e5c5d',
     'authToken': '9455e3eb3109edc12e3d8c92768f7a67',
     'fromPhone': '+15005550006'
-}
+};
+
+templateGlobals = {
+    'appName':  'UptimeChecker',
+    'companyName':  'NotARealCompany, Inc',
+    'yearCreated':   '2018',
+};
+
 
 // Staging (default) environment
 environments.staging = {
@@ -24,8 +31,10 @@ environments.staging = {
     'envName': 'staging',
     'hashingSecret': 'thisIsASecret',
     'maxChecks': 5,
-    twilio
+    twilio,
+    templateGlobals
 };
+environments.staging.templateGlobals.baseUrl = 'http://localhost:' + environments.staging.httpPort + '/';
 
 // Production environment
 environments.production = {
@@ -34,8 +43,10 @@ environments.production = {
     'envName': 'production',
     'hashingSecret': 'thisIsAlsoASecret',
     'maxChecks': 5,
-    twilio
+    twilio,
+    templateGlobals
 };
+environments.production.templateGlobals.baseUrl = 'http://localhost:' + environments.production.httpPort + '/';
 
 // Determine which enviornment was passed as a command-line arg.
 let currentEnvironment = typeof(process.env.NODE_ENV) == 'string' ? process.env.NODE_ENV.toLowerCase() : '';

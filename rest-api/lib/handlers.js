@@ -19,12 +19,27 @@ const handlers = {};
 handlers.index = function(data, callback) {
     // Handle only GET method.
     if(data.method === 'get') {
+        // Prepare data for interpolation.
+        let templateData = {
+            'head.title': 'This is the title',
+            'head.description': 'This is the meta description',
+            'body.title': 'Hello templated world.',
+            'body.class': 'index'
+        };
         // Read in a template as a string.
-        helpers.getTemplate('index', function(err, str) {
+        helpers.getTemplate('index', templateData, function(err, str) {
             if(!err && str) {
-                debug(str);
-                callback(200, str, 'html');
+                // Add the universal header and footer
+                helpers.addUniversalTemplates(str, templateData, function(err, str) {
+                    if(!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        debug('Failed when addUniversalTemplates', err, str);
+                        callback(500, undefined, 'html');
+                    }
+                });
             } else {
+                debug('Failed whem getTemplate', err, str);
                 callback(500, undefined, 'html');
             }
         });
