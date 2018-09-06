@@ -22,8 +22,7 @@ handlers.index = function(data, callback) {
         // Prepare data for interpolation.
         let templateData = {
             'head.title': 'This is the title',
-            'head.description': 'This is the meta description',
-            'body.title': 'Hello templated world.',
+            'head.description': 'We offer free, simple uptime montioring of your sites. When down, we will send you a text.',
             'body.class': 'index'
         };
         // Read in a template as a string.
