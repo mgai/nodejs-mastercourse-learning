@@ -82,6 +82,40 @@ handlers.accountCreate = function(data, callback) {
 }
 
 /**
+ * Session Creation handler
+ */
+handlers.sessionCreate = function(data, callback) {
+    // Handle only GET method.
+    if(data.method === 'get') {
+        // Prepare data for interpolation.
+        let templateData = {
+            'head.title': 'Login to your account',
+            'head.description': 'Please enter your phone number and password for access',
+            'body.class': 'sessionCreate'
+        };
+        // Read in a template as a string.
+        helpers.getTemplate('sessionCreate', templateData, function(err, str) {
+            if(!err && str) {
+                // Add the universal header and footer
+                helpers.addUniversalTemplates(str, templateData, function(err, str) {
+                    if(!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        debug('Failed when addUniversalTemplates', err, str);
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                debug('Failed whem getTemplate', err, str);
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');   // 405 - Not allowed.
+    }
+}
+
+/**
  * Favicon handler.
  * @param data the request object.
  * @param callback (code, data, type)
