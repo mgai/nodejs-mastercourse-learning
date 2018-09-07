@@ -151,6 +151,42 @@ handlers.sessionDeleted = function(data, callback) {
 }
 
 /**
+ * Account Edit handler
+ * We don't actually need a page to delete the session, but rather we want to show a DELETED page for the state.
+ */
+handlers.accountEdit = function(data, callback) {
+    // Handle only GET method.
+    if(data.method === 'get') {
+        // Prepare data for interpolation.
+        let templateData = {
+            'head.title': 'Account Settings',
+            // Description is commented out, as this is a protected page, Bots wouldn't be able to scrap it.
+            // 'head.description': 'You have been logged out of your account.',
+            'body.class': 'accountEdit'
+        };
+        // Read in a template as a string.
+        helpers.getTemplate('accountEdit', templateData, function(err, str) {
+            if(!err && str) {
+                // Add the universal header and footer
+                helpers.addUniversalTemplates(str, templateData, function(err, str) {
+                    if(!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        debug('Failed when addUniversalTemplates', err, str);
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                debug('Failed whem getTemplate', err, str);
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');   // 405 - Not allowed.
+    }
+}
+
+/**
  * Favicon handler.
  * @param data the request object.
  * @param callback (code, data, type)
