@@ -137,7 +137,7 @@ checkHandler.put = function(data, callback) {
                             // Update the check where necessary.
                             if(protocol) check.protocol = protocol;
                             if(url) check.url = url;
-                            if(method) check.method = smethod;
+                            if(method) check.method = method;
                             if(successCodes) check.successCodes = successCodes;
                             if(timeoutSeconds) check.timeoutSeconds = timeoutSeconds;
                             _data.update('checks', id, check, function(err) {
