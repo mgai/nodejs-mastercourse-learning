@@ -11,12 +11,22 @@ const environments = {};
  * therefore, `envName` is created to mark the actual enviornment used.
  */
 
+const templateGlobals = {
+    'appName': 'Pizzania',
+    'companyName': 'Pizzania Company, Inc',
+    'yearCreated': '2018'
+}
+
 // Staging (default) environment
 environments.staging = {
     'httpPort': 3000,
     'httpsPort': 3001,
     'envName': 'staging',
     'hashingSecret': 'thisIsASecret',
+    'templateGlobals': {
+        ...templateGlobals,
+        'baseUrl': 'http://localhost:3000/'
+    }
 };
 
 // Production environment
@@ -25,6 +35,10 @@ environments.production = {
     'httpsPort': 5001,
     'envName': 'production',
     'hashingSecret': 'thisIsAlsoASecret',
+    'templateGlobals': {
+        ...templateGlobals,
+        'baseUrl': 'http://localhost:5000/'
+    }
 };
 
 // Determine which enviornment was passed as a command-line arg.

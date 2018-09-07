@@ -5,9 +5,13 @@
 
 // Dependencies
 const debug = require('util').debuglog('helpers');
+const fs = require('fs');
+const path = require('path');
 const crypto = require('crypto');
 const https = require('https');
 const querystring = require('querystring');
+
+const config = require('./config');
 
 // Container
 const helpers = {};
@@ -220,6 +224,123 @@ helpers.sendInvoice = function(user, order, callback) {
     req.write(stringPayload);
     req.end();
 };
+
+/**
+ * *********************************************************
+ * The following are copied from the course code repository.
+ * *********************************************************
+ */
+
+/**
+ * Get the string content of a template.
+ * @param templateName
+ * @param data The key-value pairs for variable replacement in the template.
+ * @param callback(err, templateStr) 
+ */
+helpers.getTemplate = function(templateName, data, callback) {
+    templateName = typeof(templateName) == 'string' && templateName.length > 0 ? templateName : false;
+    data = typeof(data) == 'object' && data !== null ? data : {};
+
+    if(templateName) {
+        const templatesDir = path.join(__dirname, '/../templates/');
+        fs.readFile(templatesDir + templateName + '.html', 'utf8', function(err, str) {
+            if(!err) {
+                // Do interpolation on the string.
+                let finalString = helpers.interpolate(str, data);
+                callback(false, finalString);
+            } else {
+                debug(err, templateName);
+                callback('No template could be found');
+            }
+        });
+    } else {
+        callback('A valid template name was not specified.');
+    }
+};
+
+/**
+ * Add the universal header and footer to a string (template),
+ * pass the provided data object to the header and footer for interpolation. 
+ */
+helpers.addUniversalTemplates = function(str, data, callback) {
+    str = typeof(str) == 'string' && str.length > 0 ? str : '';
+    data = typeof(data) == 'object' && data !== null ? data : {};
+
+    // Get the header.
+    helpers.getTemplate('_header', data, function(err, headerString) {
+        if(!err && headerString) {
+            // Get the footer.
+            helpers.getTemplate('_footer', data, function(err, footerString){
+                if(!err) {
+                    const fullString = headerString + str + footerString;
+                    callback(false, fullString);
+                } else {
+                    debug(err);
+                    callback('Could not find the footer template');
+                }
+            })
+        } else {
+            debug(err);
+            callback('Could not find the header template');
+        }
+    });
+}
+
+/**
+ * Take a given string and a data object, find/replace all the keys.
+ * @param str The string for content to be replaced in.
+ * @param data The data to be replaced INTO the str.
+ */
+helpers.interpolate = function(str, data) {
+    str = typeof(str) == 'string' && str.length > 0 ? str : '';
+    data = typeof(data) == 'object' && data !== null ? data : {};
+
+    // Add the template globals to the data object.
+    // prepending their key name with "global".
+    for(let keyName in config.templateGlobals) {
+        if(config.templateGlobals.hasOwnProperty(keyName)) {
+            // We are not adding the global as an object, but rather a hard coded top level var.
+            data['global.'+keyName] = config.templateGlobals[keyName];
+        }
+    };
+
+    // For each key in the data object, insert its value into the string at the place.
+    for(let key in data) {
+        if(data.hasOwnProperty(key) && typeof(data[key]) == 'string') {
+            let replace = data[key];
+            let find = '{' + key + '}';
+            // Single occurrence replacement with doing mere substr replacement.
+            // str = str.replace(find, replace); 
+            // For global replacement of every occurrence..
+            let rx = new RegExp(find, 'g'); 
+            str = str.replace(rx, replace);
+        }
+    }
+
+    return str;
+}
+
+/**
+ * Get the content of a static (public) asset.
+ * @param fileName 
+ * @param callback 
+ */
+helpers.getStaticAsset = function(fileName, callback) {
+    fileName = typeof(fileName) == 'string' && fileName.length > 0 ? fileName: false;
+    if(fileName) {
+        let publicDir = path.join(__dirname, '/../public/');
+        fs.readFile(publicDir+fileName, function(err, data) {
+            if(!err && data) {
+                callback(false, data);
+            } else {
+                debug(err);
+                callback('No file could be found.');
+            }
+        });
+    } else {
+        callback('A valid filename was not specified.');
+    }
+}
 
 // Export
 module.exports = helpers;
