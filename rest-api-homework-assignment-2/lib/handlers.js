@@ -133,6 +133,20 @@ handlers.index = function(data, callback) {
 }
 
 /**
+ * Items handler.
+ */
+handlers.items = function(data, callback) {
+  handlers.templateHandler(data, {
+    templateName: 'itemsList',
+    templateData: {
+      'head.title': 'Yummy pizza',
+      'head.description': 'Our pizza menu',
+      'body.class': 'itemsList'
+    }
+  }, callback);
+}
+
+/**
  * Account Create handler.
  */
 handlers.accountCreate = function(data, callback) {
@@ -142,6 +156,20 @@ handlers.accountCreate = function(data, callback) {
       'head.title': 'Create an Account',
       'head.description': 'Start by signing up today!',
       'body.class': 'accountCreate'
+    }
+  }, callback)
+}
+
+/**
+ * Session Create handler.
+ */
+handlers.sessionCreate = function(data, callback) {
+  handlers.templateHandler(data, {
+    templateName: 'sessionCreate',
+    templateData: {
+      'head.title': 'Log in',
+      'head.description': 'Log in to order',
+      'body.class': 'sessionCreate'
     }
   }, callback)
 }

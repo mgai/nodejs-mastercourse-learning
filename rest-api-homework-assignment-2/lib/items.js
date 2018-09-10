@@ -25,36 +25,49 @@ items._getFullList = (callback) => {
     }
 }
 
+/**
+ * I am commenting out the original items.get() function as it was requiring authentication.
+ */
 items.get = (data, callback) => {
-    const email = helpers.validate(data.queryStringObject.email, {type: 'string'});
-    if(email) {
-        const tokenId = helpers.validate(data.headers.token, {type: 'string'});
-        if(tokenId) {
-            const userId = helpers.md5(email);
-            if(userId) {
-                tokens.validate({tokenId, userId}, err => {
-                    if(!err) {
-                        items._getFullList((err, fullList) => {
-                            if(!err) {
-                                callback(200, fullList);
-                            } else {
-                                callback(500, {'Error': err.message});
-                            }
-                        })
-                    } else {
-                        callback(401, {'Error': 'Token is invalid.'});
-                    }
-                });
-            } else {
-                callback(500, {'Error': 'Failed to compute user ID.'});
-            }
+    items._getFullList((err, fullList) => {
+        if(!err) {
+            callback(200, fullList);
         } else {
-            callback(401, {'Error': 'Token is not present.'});
+            callback(500, {'Error': err.message});
         }
-    } else {
-        callback(400, {'Error': 'Missing required field(s).'});
-    }
+    })
 }
+
+// items.get = (data, callback) => {
+//     const email = helpers.validate(data.queryStringObject.email, {type: 'string'});
+//     if(email) {
+//         const tokenId = helpers.validate(data.headers.token, {type: 'string'});
+//         if(tokenId) {
+//             const userId = helpers.md5(email);
+//             if(userId) {
+//                 tokens.validate({tokenId, userId}, err => {
+//                     if(!err) {
+//                         items._getFullList((err, fullList) => {
+//                             if(!err) {
+//                                 callback(200, fullList);
+//                             } else {
+//                                 callback(500, {'Error': err.message});
+//                             }
+//                         })
+//                     } else {
+//                         callback(401, {'Error': 'Token is invalid.'});
+//                     }
+//                 });
+//             } else {
+//                 callback(500, {'Error': 'Failed to compute user ID.'});
+//             }
+//         } else {
+//             callback(401, {'Error': 'Token is not present.'});
+//         }
+//     } else {
+//         callback(400, {'Error': 'Missing required field(s).'});
+//     }
+// }
 
 items.routing = (data, callback) => {
     const acceptableMethods = ['get']; // Still an array just to keep future compatible if other methods are supported.

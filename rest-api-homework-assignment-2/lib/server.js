@@ -98,6 +98,11 @@ server.unifiedServer = function(req, res) {
             trimmedPath, queryStringObject, method, headers,
             'payload': helpers.parseJsonToObject(buffer)
         };
+
+        debug(helpers.ansiColorString.BLUE, 'Dumping request info extracted');
+        debug(data);
+        debug(helpers.ansiColorString.BLUE, 'End of request dump');
+    
         
         // Routing.
         let chosenHandler = typeof(server.router[trimmedPath]) !== 'undefined' ? server.router[trimmedPath] : server.router.notfound;
@@ -131,6 +136,7 @@ server.router = {
     '': handlers.index,
     'favicon.ico': handlers.favicon,
     'public': handlers.public,
+    'items': handlers.items,
     // Sign Up page.
     'account/create': handlers.accountCreate,
     'account/edit': handlers.accountEdit,

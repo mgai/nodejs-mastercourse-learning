@@ -41,7 +41,8 @@ helpers.parseJsonToObject = function(buffer) {
     try {
         return JSON.parse(buffer);
     } catch(e) {
-        debug('Invalid string received for JSON parsing. Returning {}', e);
+        debug(helpers.ansiColorString.CYAN, 'Invalid string received for JSON parsing. Returning {}');
+        debug(e);
         return {};
     }
 };

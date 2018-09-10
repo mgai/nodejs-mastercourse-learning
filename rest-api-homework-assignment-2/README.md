@@ -108,7 +108,7 @@ To build the simple front-end for the Pizza API from the Homework-2. ([Original 
 1. [Signup on the site](#Signup-on-the-site)
 2. [View all the items available to order](#view-all-items)
 3. [Fill up a shopping cart](#shopping-cart)
-4. [Place an order](#Checkout-process) (with [fake credit card credentials](https://stripe.com/docs/testing#cards)), and receive an email receipt.
+4. [Place an order](#Checkout-process) \(with [fake credit card credentials](https://stripe.com/docs/testing#cards)\), and receive an email receipt.
 
 ### Before diving into coding
 
@@ -126,6 +126,8 @@ The following needs to be created -
 This is simply a front-end representation of the `GET /api/items`
 
 It's a protected page available to LoggedOn user only.
+
+The link would be `http://localhost:3000/items`
 
 #### Shopping cart
 
