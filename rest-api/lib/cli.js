@@ -61,9 +61,79 @@ e.on('more check info', function(str) {
 // Responders
 cli.responders = {};
 
+cli.horizontalLine = function() {
+    // Get the available screen size.
+    let width = process.stdout.columns;
+
+    let line = '';
+    for (let i=0; i<width; i++) {
+        line += '-';
+    }
+    console.log(line);
+};
+
+cli.centered = function(str) {
+    str = typeof(str) == 'string' && str.trim().length > 0 ? str.trim() : '';
+    // Get the available screen size.
+    let width = process.stdout.columns;
+
+    let leftPadding = Math.floor((width - str.length) /2);
+    let line = '';
+    for(let i=0; i<leftPadding; i++) {
+        line +=' ';
+    };
+    line += str;
+    console.log(line);
+};
+
+cli.verticalSpace = function(lines) {
+    lines = typeof(lines) == 'number' && lines > 0 ? lines : 1;
+    for(let i=0; i<lines; i++) {
+        console.log('');    // Simply putting in new lines.
+    }
+};
+
 // Help / Man
 cli.responders.help = function() {
-    console.log('You asked for help.');
+    let commands =  {
+        'exit': 'Kill the CLI and the rest of the application.',
+        'man': 'Show this help.',
+        'help': 'Alias of the "man" command',
+        'stats': 'Get the stats of the underlyhing system and resource utilization.',
+        'list users': 'Show a list of all the registered (undeleted) users in the system',
+        'more user info --{userId}': 'Show details of the specific user (userId provided)',
+        'list checks [--<up|down>]': 'Show a list of all the active checks in the system, with optional filtering to up/down per specified',
+        'more check info --{checkId}': 'Show details of the specific check (checkId provided)',
+        'list logs': 'Show a list of all the logs',
+        'more log info --{logId}': 'Show details of the specific log file.'
+   };
+
+   cli.horizontalLine();
+   cli.centered('CLI Manual');
+   cli.horizontalLine();
+   cli.verticalSpace(2);
+
+   // Show each command, followed by its explanation, in while and yellow respectively.
+   for(let key in commands) {
+       if(commands.hasOwnProperty(key)) {
+           let value = commands[key];
+           let line = helpers.ansiColorString.YELLOW.replace('%s', key);
+
+           // Add padding to same width - 60 char.
+           let padding = 60 - line.length;
+           for (let i=0; i<padding; i++) {
+               line+=' ';
+           };
+           line += value;
+
+           console.log(line);
+           cli.verticalSpace(1);
+       }
+   }
+
+   cli.verticalSpace(1);
+   // End with another horizontal line.
+   cli.horizontalLine();
 };
 
 cli.responders.exit = function() {
