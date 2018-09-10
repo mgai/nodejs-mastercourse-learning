@@ -3,8 +3,9 @@
  */
 
 // Dependencies.
-let server = require('./lib/server');
-let workers = require('./lib/workers');
+const server = require('./lib/server');
+const workers = require('./lib/workers');
+const cli = require('./lib/cli');
 
 // Declare the app.
 const app = {};
@@ -21,6 +22,12 @@ app.init = function() {
 
     // Call the compression loop.
     workers.logRotationLoop();
+
+    // CLI needs to be started at LAST, since it will be into the interactive mode.
+    // Putting in a delayed execution would make sure any screen output would be done first.
+    setTimeout(function() {
+        cli.init();
+    }, 50);
 };
 
 app.init();
