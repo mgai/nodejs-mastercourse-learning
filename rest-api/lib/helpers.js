@@ -18,6 +18,23 @@ let helpers = {};
 
 // Helpers.
 
+/**
+ * Answer colored string for colorful output in logging.
+ * Use with console.log or debug.
+ * E.g. 
+ *  console.log(ansiColorString.RED, "This text should be red.");
+ *  debug(ansiColorString.YELLOW, "This text should be yellow.");
+ */
+helpers.ansiColorString = {
+    'RED': '\x1b[31m%s\x1b[0m',
+    'GREEN': '\x1b[32m%s\x1b[0m',
+    'YELLOW': '\x1b[33m%s\x1b[0m',
+    'BLUE': '\x1b[34m%s\x1b[0m',
+    'MAGENTA': '\x1b[35m%s\x1b[0m',
+    'CYAN': '\x1b[36m%s\x1b[0m',
+};
+
+
 // SHA256 hash.
 helpers.hash = function(str) {
     if(typeof(str) == 'string' && str.length>0) {
