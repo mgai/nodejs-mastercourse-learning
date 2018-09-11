@@ -224,7 +224,29 @@ cli.responders.moreUserInfo = function(str) {
 };
 
 cli.responders.listChecks = function(str) {
-    console.log('You asked for listChecks.', str);
+    _data.list('checks', function(err, checkIds) {
+        if(!err && checkIds && checkIds.length > 0) {
+            cli.verticalSpace();
+            checkIds.forEach(checkId => {
+                _data.read('checks', checkId, function(err, checkData) {
+                    if(!err && checkData) {
+                        let includeCheck = false;
+                        let lowerString = str.toLowerCase();
+    
+                        // Get the state, default do down. this is used for the parameter comparison, and we include missing state, i.e. unknown for down case.
+                        let state = typeof(checkData.state) == 'string' ? checkData.state: 'down';
+                        // This is the actual state retrieved from the record for display, either Up, Down or unkown.
+                        let stateOrUnkown = typeof(checkData.state) == 'string' ? checkData.state: 'unkown';
+                        if(lowerString.indexOf('--'+ state) > -1 || (lowerString.indexOf('--down') == -1 && lowerString.indexOf('--up') == -1 )) {
+                            let line = 'ID: ' + checkData.id + ' ' + checkData.method.toUpperCase() + ' ' + checkData.protocol + '://' + checkData.url + ' State:' + stateOrUnkown;
+                            console.log(line);
+                            cli.verticalSpace();
+                        }
+                    }
+                });
+            })
+        }
+    })
 };
 
 cli.responders.moreCheckInfo = function(str) {
