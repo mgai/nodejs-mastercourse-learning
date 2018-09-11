@@ -58,7 +58,7 @@ e.on('more log info', function(str) {
 });
 
 e.on('more check info', function(str) {
-    cli.responders.moreUserInfo(str);
+    cli.responders.moreCheckInfo(str);
 });
 
 // Responders
@@ -250,7 +250,22 @@ cli.responders.listChecks = function(str) {
 };
 
 cli.responders.moreCheckInfo = function(str) {
-    console.log('You asked for moreCheckInfo.', str);
+    // Get the ID from the string
+    let arr = str.split('--');
+    let checkId = typeof(arr[1]) == 'string' && arr[1].trim().length > 0 ? arr[1].trim() : false;
+    if(checkId) {
+        // Look up the user
+        _data.read('checks', checkId, function(err, checkData) {
+            if(!err && checkData) {
+                // Remove the hashed password - NEVER display hashed password.
+                delete checkData.hashedPassword;
+                // Print the JSON object with text highlighting.
+                cli.verticalSpace();
+                console.dir(checkData, {'colors': true});
+                cli.verticalSpace();
+            }
+        })
+    }
 };
 
 cli.responders.listLogs = function() {
