@@ -284,7 +284,25 @@ cli.responders.listLogs = function() {
 };
 
 cli.responders.moreLogInfo = function(str) {
-    console.log('You asked for moreLogInfo.', str);
+    // Get the ID from the string
+    let arr = str.split('--');
+    let fileName = typeof(arr[1]) == 'string' && arr[1].trim().length > 0 ? arr[1].trim() : false;
+    console.log(helpers.ansiColorString.YELLOW, fileName);
+    if(fileName && fileName.indexOf('-') > -1) {
+        _logs.decompress(fileName, function(err, logContent) {
+            if(!err && logContent) {
+                // Split into lines
+                let arr = logContent.split('\n');
+                arr.forEach(function(jsonString) {
+                    let logObject = helpers.parseJsonToObject(jsonString);
+                    if(logObject && JSON.stringify(logObject) !== '{}') {
+                        console.dir(logObject, {'color': true});
+                        cli.verticalSpace();
+                    }
+                })
+            }
+        })
+    }
 };
 
 // Input processing.
