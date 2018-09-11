@@ -13,6 +13,7 @@ const events = require('events');
 
 const helpers = require('./helpers');
 const _data = require('./data');
+const _logs = require('./logs');
 
 class _events extends events{};
 const e = new _events();
@@ -107,7 +108,7 @@ cli.responders.help = function() {
         'more user info --{userId}': 'Show details of the specific user (userId provided)',
         'list checks [--<up|down>]': 'Show a list of all the active checks in the system, with optional filtering to up/down per specified',
         'more check info --{checkId}': 'Show details of the specific check (checkId provided)',
-        'list logs': 'Show a list of all the logs',
+        'list logs': 'Show a list of all the logs (compressed only)',
         'more log info --{logId}': 'Show details of the specific log file.'
    };
 
@@ -269,7 +270,17 @@ cli.responders.moreCheckInfo = function(str) {
 };
 
 cli.responders.listLogs = function() {
-    console.log('You asked for listLogs.');
+    _logs.list(true, function(err, logFileNames){
+        if(!err && logFileNames && logFileNames.length > 0) {
+            cli.verticalSpace();
+            logFileNames.forEach(logFileName => {
+                if(logFileName.indexOf('-') > -1) { // '-' is used to identify the compressed logs.
+                    console.log(logFileName);
+                    cli.verticalSpace();
+                }
+            });
+        }
+    })
 };
 
 cli.responders.moreLogInfo = function(str) {
