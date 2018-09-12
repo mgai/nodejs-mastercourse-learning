@@ -245,12 +245,23 @@ app.setSessionToken = function(token){
   localStorage.setItem('token',tokenString);
   if(typeof(token) == 'object'){
     console.log('Successfully logged in.');
-    // app.setLoggedInClass(true);
+    app.setLoggedInClass(true);
   } else {
     console.warn('Failed to log in.');
-    // app.setLoggedInClass(false);
+    app.setLoggedInClass(false);
   }
 };
+
+// Set (or remove) the loggedIn class from the body.
+// add 'loggedIn' class when logged in, or remove when logging out.
+app.setLoggedInClass = function(add) {
+  let target = document.querySelector("body");
+  if(add) {
+    target.classList.add('loggedIn');
+  } else {
+    target.classList.remove('loggedIn');
+  }
+}
 
 // Load pizza list.
 app.loadPizzaList = function() {
@@ -271,7 +282,7 @@ app.loadPizzaList = function() {
           td1.innerHTML = pizza.name;
           td2.innerHTML = pizza.description;
           td3.innerHTML = pizza.price;
-          td4.innerHTML = '<a href="/carts/add?id=' + pizza.id + '">Add to cart</a>'
+          td4.innerHTML = `<input type="checkbox" name="order" value="${pizza.id}">`;
         });
       }
     } else {
