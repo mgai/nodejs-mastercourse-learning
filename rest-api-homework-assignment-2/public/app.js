@@ -302,7 +302,7 @@ app.loadDataOnPage = function() {
       app.loadPizzaList();
       break;
     default:
-      console.log('Unknown class - ' + primaryClass);
+      console.log('loadDataOnPage - Skipping Unknown class - ' + primaryClass);
   }
 }
 
