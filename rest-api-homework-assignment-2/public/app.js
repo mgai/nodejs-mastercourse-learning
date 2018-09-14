@@ -275,12 +275,10 @@ app.loadPizzaList = function() {
           let tr = table.insertRow(-1); // -1 means append a new row at the bottom.
           let td0 = tr.insertCell(0);   // Cell for - ID
           let td1 = tr.insertCell(1);   // Cell for - Name
-          let td2 = tr.insertCell(2);   // Cell for - Description
-          let td3 = tr.insertCell(3);   // Cell for - Price
-          let td4 = tr.insertCell(4);   // Cell for - Action
+          let td3 = tr.insertCell(2);   // Cell for - Price
+          let td4 = tr.insertCell(3);   // Cell for - Action
           td0.innerHTML = pizza.id;
           td1.innerHTML = pizza.name;
-          td2.innerHTML = pizza.description;
           td3.innerHTML = pizza.price;
           td4.innerHTML = `<input type="checkbox" name="order" value="${pizza.id}">`;
         });

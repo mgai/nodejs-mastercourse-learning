@@ -35,6 +35,12 @@ carts.get = (data, callback) => {
   } ,callback);
 };
 
+/**
+ * Carts Post handler.
+ * If cart does not exist yet for the user, a new cart would be created.
+ * Otherwise, the cart would be overwritten.
+ * @todo To refine the cart and order logic.
+ */
 carts.post = (data, callback) => {
   auth(data, () => {
     withUserId(data, () => {
