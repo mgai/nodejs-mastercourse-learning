@@ -125,7 +125,9 @@ The following needs to be created -
 
 This is simply a front-end representation of the `GET /api/items`
 
-It's a protected page available to LoggedOn user only.
+By default, this page should be visible to public.
+
+As such, we need to make sure the Meta data for SEO.
 
 The link would be `http://localhost:3000/items`
 
