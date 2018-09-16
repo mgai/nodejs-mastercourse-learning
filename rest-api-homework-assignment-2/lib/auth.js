@@ -36,6 +36,39 @@ function auth(data, handler, callback) {
     }
 };
 
+/**
+ * New authentication method
+ * It requires token to be present in the header.
+ * The token must be valid.
+ * Upon authentication check, user would be added to the data.payload.
+ */
+function authNew(data, handler, callback) {
+    debug(helpers.ansiColorString.GREEN, 'New auth is now called.');
+    const tokenId = helpers.validate(data.headers.token, {type: 'string'});
+    if(tokenId) {
+        tokens.isValid(tokenId, (err, token) => {
+            if(!err && token) {
+                data.payload.token = token;
+                _data.read('users', token.userId, (err, user) => {
+                    if(!err && user) {
+                        delete user.hashedPassword;
+                        data.payload.user = user;
+                        debug(data.payload);
+                        handler(data, callback);
+                    } else {
+                        debug(helpers.ansiColorString.CYAN, err, user);
+                        callback(500);
+                    }
+                })
+            } else {
+                callback(401, {'Error': 'Token is not valid.'});
+            }
+        })
+    } else {
+        callback(401, {'Error': 'Token is not present.'});
+    }
+}
+
 function withUserId(data, handler, callback) {
     const email = helpers.validate(data.queryStringObject.email, {type:'string'});
     if(email) {
@@ -52,6 +85,6 @@ function withUserId(data, handler, callback) {
 }
 
 module.exports = {
-    auth,
+    'auth': authNew,
     withUserId
 }

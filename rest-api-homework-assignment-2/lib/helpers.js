@@ -39,6 +39,7 @@ helpers.ansiColorString = {
  */
 helpers.parseJsonToObject = function(buffer) {
     try {
+        debug(helpers.ansiColorString.CYAN, buffer);
         return JSON.parse(buffer);
     } catch(e) {
         debug(helpers.ansiColorString.CYAN, 'Invalid string received for JSON parsing. Returning {}');

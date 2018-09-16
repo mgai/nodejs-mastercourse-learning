@@ -144,8 +144,8 @@ server.router = {
     // Log on.
     'session/create': handlers.sessionCreate,
     // Log out.
-    'session/delete': handlers.sessionDeleted,
-    'cart': handlers.cartEdit,
+    'session/deleted': handlers.sessionDeleted,
+    'carts': handlers.cartsEdit,
     'order/checkout': handlers.orderCheckout,
     'order/edit': handlers.orderEdit,
     // API routers.

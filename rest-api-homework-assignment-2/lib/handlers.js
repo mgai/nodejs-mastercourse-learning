@@ -173,5 +173,33 @@ handlers.sessionCreate = function(data, callback) {
     }
   }, callback)
 }
+
+/**
+ * Session Delete handler for log out action.
+ */
+handlers.sessionDeleted = function(data, callback) {
+  handlers.templateHandler(data, {
+    templateName: 'sessionDeleted',
+    templateData: {
+      'head.title': 'Logged out',
+      'head.description': 'You have been logged out of your account',
+      'body.class': 'sessionDeleted'
+    }
+  }, callback)
+}
+
+/**
+ * Cart Edit handler.
+ */
+handlers.cartsEdit = function(data, callback) {
+  handlers.templateHandler(data, {
+    templateName: 'cartsEdit',
+    templateData: {
+      'head.title': 'Your current shopping cart',
+      'body.class': 'cartsEdit'
+    }
+  }, callback)
+}
+
 // Export
 module.exports = handlers;

@@ -144,6 +144,23 @@ tokens.delete = (data, callback) => {
     }
 }
 
+/**
+ * Verify a token is not expired.
+ * @param tokenId
+ * @param callback(err) - callback(false) if OK.
+ */
+tokens.isValid = (tokenId, callback) => {
+    _data.read('tokens', tokenId, (err, token) => {
+        if(!err && token) {
+            callback(token.expires <= Date.now(), token);  // False when valid.
+        } else {
+            debug('Error when validating the token.', err);
+            callback('Token is not valid.');
+        }
+    })
+}
+
+
 // Users routing check.
 tokens.routing = (data, callback) => {
     const acceptableMethods = ['post', 'get', 'put', 'delete'];

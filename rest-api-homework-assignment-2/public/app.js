@@ -204,14 +204,14 @@ app.formResponseProcessor = function(formId,requestPayload,responsePayload){
       } else {
         // If successful, set the token and redirect the user
         app.setSessionToken(newResponsePayload);
-        window.location = '/items/all';
+        window.location = '/items';
       }
     });
   }
   // If login was successful, set the token in localstorage and redirect the user
   if(formId == 'sessionCreate'){
     app.setSessionToken(responsePayload);
-    window.location = '/checks/all';
+    window.location = '/items';
   }
 
   // If forms saved successfully and they have success messages, show them
@@ -227,8 +227,8 @@ app.formResponseProcessor = function(formId,requestPayload,responsePayload){
   }
 
   // If the user just created a new check successfully, redirect back to the dashboard
-  if(formId == 'checksCreate'){
-    window.location = '/checks/all';
+  if(formId == 'addToCart'){
+    window.location = '/carts';
   }
 
   // If the user just deleted a check, redirect them to the dashboard
@@ -280,11 +280,51 @@ app.loadPizzaList = function() {
           td0.innerHTML = pizza.id;
           td1.innerHTML = pizza.name;
           td3.innerHTML = pizza.price;
-          td4.innerHTML = `<input type="checkbox" name="order" value="${pizza.id}">`;
+          td4.innerHTML = `<input type="checkbox" class="multiselect intval" name="cart" value="${pizza.id}">`;
         });
       }
     } else {
       console.log(statusCode, 'Failed - GET api/items');
+    }
+  });
+}
+
+// Load shopping cart.
+app.loadShoppingCart = function() {
+  app.client.request(undefined, 'api/carts', 'GET', undefined, undefined, function(statusCode, responsePayload) {
+    if(statusCode == 200) {
+      // Process returned list of items.
+      const cart = typeof(responsePayload) == 'object' && responsePayload instanceof Array && responsePayload.length > 0 ? responsePayload: false;
+      const table = document.getElementById('itemsListTable');
+      if(cart) {
+        console.log('Shopping cart returned - ', cart);
+        app.client.request(undefined, 'api/items', 'GET', undefined, undefined, function(statusCode, responsePayload) {
+          if(statusCode == 200) {
+            const pizzaList = typeof(responsePayload) == 'object' && responsePayload instanceof Array && responsePayload.length > 0 ? responsePayload: false;
+            if(pizzaList) {
+              let orderedPizzas = pizzaList.filter(e => cart.indexOf(e.id) > -1);
+              console.dir(orderedPizzas, {'color': true});
+              orderedPizzas.forEach(pizza => {
+                let tr = table.insertRow(-1); // -1 means append a new row at the bottom.
+                let td0 = tr.insertCell(0);   // Cell for - ID
+                let td1 = tr.insertCell(1);   // Cell for - Name
+                let td3 = tr.insertCell(2);   // Cell for - Price
+                let td4 = tr.insertCell(3);   // Cell for - Action
+                td0.innerHTML = pizza.id;
+                td1.innerHTML = pizza.name;
+                td3.innerHTML = pizza.price;
+                td4.innerHTML = `<input type="checkbox" class="multiselect intval" name="cart" value="${pizza.id}" checked>`;
+              });
+            }
+          } else {
+            console.log(statusCode, 'Failed - GET api/items');
+          }
+        });
+      } else {
+        console.log(statusCode, 'No cart returned');
+      }
+    } else {
+      console.log(statusCode, 'Failed - GET api/carts');
     }
   });
 }
@@ -299,14 +339,121 @@ app.loadDataOnPage = function() {
     case 'itemsList':
       app.loadPizzaList();
       break;
+    case 'cartsEdit':
+      app.loadShoppingCart();
     default:
       console.log('loadDataOnPage - Skipping Unknown class - ' + primaryClass);
   }
 }
 
+// Log the user out then redirect them
+app.logUserOut = function(redirectUser){
+  // Set redirectUser to default to true
+  redirectUser = typeof(redirectUser) == 'boolean' ? redirectUser : true;
+
+  // Get the current token id
+  var tokenId = typeof(app.config.sessionToken.id) == 'string' ? app.config.sessionToken.id : false;
+
+  // Send the current token to the tokens endpoint to delete it
+  var queryStringObject = {
+    'id' : tokenId
+  };
+  app.client.request(undefined,'api/tokens','DELETE',queryStringObject,undefined,function(statusCode,responsePayload){
+    // Set the app.config token as false
+    app.setSessionToken(false);
+
+    // Send the user to the logged out page
+    if(redirectUser){
+      window.location = '/session/deleted';
+    }
+
+  });
+};
+
+// Bind the logout button
+app.bindLogoutButton = function(){
+  document.getElementById("logoutButton").addEventListener("click", function(e){
+
+    // Stop it from redirecting anywhere
+    e.preventDefault();
+
+    // Log the user out
+    app.logUserOut();
+
+  });
+};
+
+// Get the session token from localstorage and set it in the app.config object
+app.getSessionToken = function(){
+  var tokenString = localStorage.getItem('token');
+  if(typeof(tokenString) == 'string'){
+    try{
+      var token = JSON.parse(tokenString);
+      app.config.sessionToken = token;
+      if(typeof(token) == 'object'){
+        app.setLoggedInClass(true);
+      } else {
+        app.setLoggedInClass(false);
+      }
+    }catch(e){
+      app.config.sessionToken = false;
+      app.setLoggedInClass(false);
+    }
+  }
+};
+
+// Renew the token
+app.renewToken = function(callback){
+  var currentToken = typeof(app.config.sessionToken) == 'object' ? app.config.sessionToken : false;
+  if(currentToken){
+    // Update the token with a new expiration
+    var payload = {
+      'id' : currentToken.id,
+      'extend' : true,
+    };
+    app.client.request(undefined,'api/tokens','PUT',undefined,payload,function(statusCode,responsePayload){
+      // Display an error on the form if needed
+      if(statusCode == 200){
+        // Get the new token details
+        var queryStringObject = {'id' : currentToken.id};
+        app.client.request(undefined,'api/tokens','GET',queryStringObject,undefined,function(statusCode,responsePayload){
+          // Display an error on the form if needed
+          if(statusCode == 200){
+            app.setSessionToken(responsePayload);
+            callback(false);
+          } else {
+            app.setSessionToken(false);
+            callback(true);
+          }
+        });
+      } else {
+        app.setSessionToken(false);
+        callback(true);
+      }
+    });
+  } else {
+    app.setSessionToken(false);
+    callback(true);
+  }
+};
+
+// Loop to renew token often
+app.tokenRenewalLoop = function(){
+  setInterval(function(){
+    app.renewToken(function(err){
+      if(!err){
+        console.log("Token renewed successfully @ "+Date.now());
+      }
+    });
+  },1000 * 60);
+};
+
 // Init (bootstrapping)
 app.init = function() {
   app.bindForms();
+  app.bindLogoutButton();
+  app.getSessionToken();
+  app.tokenRenewalLoop();
   app.loadDataOnPage();
 };
 

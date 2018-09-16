@@ -14,26 +14,16 @@ const withUserId = require('./auth').withUserId;
 const carts = {};
 
 carts.get = (data, callback) => {
-  auth(data,() => {
-    const email = helpers.validate(data.queryStringObject.email, {type: 'string'});
-    if(email) {
-      const userId = helpers.md5(email);
-      if(userId) {
-        _data.read('carts', userId, (err, cart) => {
-          if(!err && cart) {
-            callback(200, cart);
-          } else {
-            callback(404);
-          }
-        })
+  auth(data, () => {
+    _data.read('carts', data.payload.token.userId, (err, cart) => {
+      if(!err && cart) {
+        callback(200, cart);
       } else {
-        callback(500, {'Error': 'Failed to compute user ID.'});
+        callback(404);
       }
-    } else {
-      callback(400, {'Error': 'Missing required field(s)', 'Extra': 'Expects email in queryStringObject'});
-    }
-  } ,callback);
-};
+    })
+  }, callback);
+}
 
 /**
  * Carts Post handler.
@@ -43,32 +33,36 @@ carts.get = (data, callback) => {
  */
 carts.post = (data, callback) => {
   auth(data, () => {
-    withUserId(data, () => {
-      _data.read('carts', data.payload.userId, (err, cart) => {
-        if(err) {
-          /**
-           * For simplicity, I am skipping validation check for items, but assume -
-           * 1. Shopping cart content is in data.payload.cart.
-           * 2. It's a valid list of items as - [{id, qty},...]
-           */
-          const cart = helpers.validate(data.payload.cart, {type: 'array'});
-          if(cart) {
-            _data.create('carts', data.payload.userId, cart, err => {
-              if(!err) {
-                callback(200);
-              } else {
-                debug(helpers.ansiColorString.RED, err)
-                callback(500, {'Error': 'Failed to save cart.'});
-              }
-            })
-          } else {
-            callback(400, {'Error': 'Missing require field(s).'});
-          }
-        } else {
-          callback(400, {'Error': 'Cart already exist', cart});
+    /**
+     * For simplicity, I am skipping validation check for items, but assume -
+     * 1. Shopping cart content is in data.payload.cart.
+     * 2. It's a valid list of items as - [{id, qty},...]
+     */
+    const cart = helpers.validate(data.payload.cart, {type: 'array'});
+    if(cart) {
+      _data.read('carts', data.payload.token.userId, (err, currCart) => {
+        /**
+         * By default we will creat new cart.
+         * Otherwise update will be called for overwritting.
+         */
+        let chosenCartHandler = _data.create;
+        if(!err) {
+          debug(helpers.ansiColorString.BLUE, 'Cart exists.');
+          // Existing record found. Update will be done.
+          chosenCartHandler = _data.update;
         }
-      });
-    }, callback);
+        chosenCartHandler('carts', data.payload.token.userId, cart, err => {
+          if(!err) {
+            callback(200);
+          } else {
+            debug(err);
+            callback(500, {'Error': 'Failed to save cart'});
+          }
+        })
+      })
+    } else {
+      callback(400, {'Error': 'Missing require field(s).'});
+    }
   }, callback);
 }
 
