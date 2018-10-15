@@ -111,7 +111,10 @@ helpers.validate = function(data, {type, length=0}) {
             return typeof(data) === 'object' && data instanceof Array && data.length > 0 ? data : [];
         case 'object':
             return typeof(data) === 'object' ? data : false;
+        case 'boolean':
+            return typeof(data) === 'boolean' ? data: false;
         default:
+            debug('Unknown type validated, returning false as deafult');
             return false;
     }
 }

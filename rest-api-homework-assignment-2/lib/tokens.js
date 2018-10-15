@@ -97,6 +97,7 @@ tokens.put = (data, callback) => {
             }
         })
     } else {
+        debug('ID && Extend: ', id, extend);
         callback(400, {'Error': 'Missing required field(s) or invalid.'});
     }
 }
