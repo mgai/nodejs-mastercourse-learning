@@ -80,7 +80,7 @@ function withUserId(data, handler, callback) {
             callback(500, {'Error': 'Failed to compute user ID.'});
         }
     } else {
-        callback(400, {'Error': 'Missing required field(s).', 'Extra': 'Email shoudl be presend in queryStringObject.'});
+        callback(400, {'Error': 'Missing required field(s).', 'Extra': 'Email should be presend in queryStringObject.'});
     }
 }
 

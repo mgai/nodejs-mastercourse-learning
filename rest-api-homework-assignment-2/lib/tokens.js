@@ -137,7 +137,7 @@ tokens.delete = (data, callback) => {
                 if(!err) {
                     callback(200);
                 } else {
-                    debug('Failed to delete token - ', error);
+                    debug('Failed to delete token - ', err);
                     callback(500, {'Error': 'Could not delete the token specified.'})
                 }
             })

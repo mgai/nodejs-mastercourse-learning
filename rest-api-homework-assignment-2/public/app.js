@@ -107,8 +107,9 @@ app.bindForms = function(){
 
 
         // Turn the inputs into a payload
-        var payload = {};
+        var payload = { card: {} }; // Initialize payload with an empty card. Yes, I know this is kinda ugly.
         var elements = this.elements;
+        console.dir(elements);
         for(var i = 0; i < elements.length; i++){
           if(elements[i].type !== 'submit'){
             // Determine class of element and set value accordingly
@@ -127,6 +128,13 @@ app.bindForms = function(){
               // Create an payload field named "id" if the elements name is actually uid
               if(nameOfElement == 'uid'){
                 nameOfElement = 'id';
+              }
+              // Combine the various card details if present.
+              if(nameOfElement.match(/^card/)) {
+                console.log('match found for card', nameOfElement);
+                payload.card[nameOfElement.replace(/^card/,'')] = valueOfElement;
+              } else {
+                console.log('Matching card element', nameOfElement);
               }
               // If the element has the class "multiselect" add its value(s) as array elements
               if(classOfElement.indexOf('multiselect') > -1){
@@ -156,7 +164,8 @@ app.bindForms = function(){
               app.logUserOut();
 
             } else {
-
+              console.log('NOK response received fromt he server for API call.', statusCode);
+              console.dir(responsePayload);
               // Try to get the error from the api, or set a default error message
               var error = typeof(responsePayload.Error) == 'string' ? responsePayload.Error : 'An error has occured, please try again';
 
