@@ -240,6 +240,10 @@ app.formResponseProcessor = function(formId,requestPayload,responsePayload){
     window.location = '/carts';
   }
 
+  if(formId == 'sendToOrders') {
+    window.location = '/order/sent'; // Redirect to show a result page if it's OK.
+  }
+
   // If the user just deleted a check, redirect them to the dashboard
   if(formId == 'checksEdit2'){
     window.location = '/checks/all';

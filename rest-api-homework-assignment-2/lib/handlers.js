@@ -201,5 +201,18 @@ handlers.cartsEdit = function(data, callback) {
   }, callback)
 }
 
+/**
+ * Order Handler.
+ */
+handlers.orderSent = function(data, callback) {
+  handlers.templateHandler(data, {
+    templateName: 'orderSent',
+    templateData: {
+      'head.title': 'Order sent successsfully.',
+      'body.class': 'orderSent'
+    }
+  }, callback);
+}
+
 // Export
 module.exports = handlers;

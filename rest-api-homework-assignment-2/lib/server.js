@@ -148,6 +148,7 @@ server.router = {
     'carts': handlers.cartsEdit,
     'order/checkout': handlers.orderCheckout,
     'order/edit': handlers.orderEdit,
+    'order/sent': handlers.orderSent,
     // API routers.
     'api/users': users.routing,
     'api/tokens': tokens.routing,
