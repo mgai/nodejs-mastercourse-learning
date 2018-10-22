@@ -117,9 +117,9 @@ To build the simple front-end for the Pizza API from the Homework-2. ([Original 
 The following needs to be created - 
 
 * [ ] `Sign Up` Page, and then then `Update Profile` Page.
-* [ ] `Log On` would do `POST /api/tokens?` to create a token.
-    * [ ] **Technical Debt** Need to support `/api/tokens?id` option.
-* [ ] `Log Out` would do `DELETE /api/tokens?` to delete the token with ID.
+* [X] ~~*`Log On` would do `POST /api/tokens?` to create a token.*~~ [2018-10-22]
+    * [ ] Need to support `/api/tokens?id` option.
+* [X] ~~*`Log Out` would do `DELETE /api/tokens?` to delete the token with ID.*~~ [2018-10-22]
 
 #### View all items
 
@@ -129,7 +129,7 @@ By default, this page should be visible to public.
 
 As such, we need to make sure the Meta data for SEO.
 
-The link would be `http://localhost:3000/items`
+The link would be `http://localhost:3000/items` or `https://localhost:3001/items`
 
 #### Shopping cart
 
@@ -141,9 +141,11 @@ Fill up a shopping cart requires an `Edit` page for the cart.
 
 #### Checkout process
 
-* [ ] `Checkout` button on the `Shopping cart` page to generate the order for checkout.
-* [ ] `Checkout Page` for payment and shipping address
-* [ ] `Email notification` upon success payment made.
-* [ ] `On screen` notification upon success payment made and email.
+* [X] ~~*`Checkout` button on the `Shopping cart` page to generate the order for checkout.*~~ [2018-10-22]
+* [X] ~~*`Checkout Page` for payment and shipping address*~~ [2018-10-22]
+* [X] ~~*`Email notification` upon success payment made.*~~ [2018-10-22]
+* [X] ~~*`On screen` notification upon success payment made and email.*~~ [2018-10-22]
 
 ### Work log
+
+Due to the holiday and daytime workload, this project was delayed for quite a long time unfortunately.
