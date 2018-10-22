@@ -432,7 +432,7 @@ app.renewToken = function(callback){
         app.client.request(undefined,'api/tokens','GET',queryStringObject,undefined,function(statusCode,responsePayload){
           // Display an error on the form if needed
           if(statusCode == 200){
-            app.setSessionToken(responsePayload);
+            app.setSessionToken({...responsePayload, 'id': currentToken.id}); // Since the API does not return the ID, we need to embed it in.
             callback(false);
           } else {
             app.setSessionToken(false);
