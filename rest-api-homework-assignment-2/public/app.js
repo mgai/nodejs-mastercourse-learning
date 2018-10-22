@@ -326,7 +326,7 @@ app.loadShoppingCart = function() {
                 td0.innerHTML = pizza.id;
                 td1.innerHTML = pizza.name;
                 td3.innerHTML = pizza.price;
-                td4.innerHTML = `<input type="checkbox" class="multiselect intval" name="cart" value="${pizza.id}" checked>`;
+                td4.innerHTML = `<input type="checkbox" class="multiselect intval" name="order" value="${pizza.id}" checked>`;
               });
             }
           } else {
