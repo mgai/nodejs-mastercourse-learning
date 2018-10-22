@@ -1,0 +1,21 @@
+<div class="container">
+  <h3>Checkout our yummy pizza!</h3>
+  <form id="addToCart" action="/api/carts" method="POST">
+    <div class="alert alert-danger formError" role="alert" style="display:none"></div>
+    <table id="itemsListTable" class="table">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Add to cart</th>
+      </tr>
+    </table>
+    <hr/>
+    <button type="submit" class="btn btn-primary">Add to shopping cart</button>
+    <div class="container" id="noItemsMessage">
+      <div class=row>
+        Hey, you don't have any items in your shopping cart, why not order some! :)
+      </div>
+    </div>
+  </form>
+</div>

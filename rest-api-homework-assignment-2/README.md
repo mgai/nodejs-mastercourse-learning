@@ -1,12 +1,20 @@
-# Homework Assignment 2
+# Homework Logbook
 
-## Requirements
+## Table of content
+
+* [Homework 2](#Homework-Assignment-2)
+* [Homework 3](#Homework-Assignment-3)
+
+
+## Homework Assignment 2
+
+### Requirements
 
 To build the **API** for a _pizza-delivery company_, where the spec from the manager. ([Original Spec](https://pirple.thinkific.com/courses/take/the-nodejs-master-class/texts/4342291-homework-assignment-2))
 
-## Design
+### Design
 
-### User
+#### User
 
 A `user` has following information -
 
@@ -38,7 +46,7 @@ By definition of `logged In`, the following information should be present in the
 
 Once order is placed, `receipt` will be sent to the user via email, with integrationof [Mailgun.com sandbox](https://documentation.mailgun.com/en/latest/faqs.html#how-do-i-pick-a-domain-name-for-my-mailgun-account)
 
-### Token
+#### Token
 
 For user log in and log out, defined as - 
 
@@ -54,13 +62,13 @@ Logged in user would always present the granted token in the `req.headers`
 
 > _This part would largely borrow from the course code for token_
 
-### Menu Item
+#### Menu Item
 
 For simplicity, menu items are hardcoded in `all-items.json`
 
-### Shopping Cart
+#### Shopping Cart
 
-#### Design choice
+##### Design choice
 
 * Each user would have one shopping cart.
 * The cart can only be modified by a user logged in, _i.e. with valid token presented._
@@ -75,7 +83,7 @@ const cart = {
 }
 ```
 
-### Order
+#### Order
 
 An order will be persisted in the system with the following information -
 
@@ -88,6 +96,56 @@ let order = {
 }
 ```
 
-### Receipt
+#### Receipt
 
 Once `order` payment is done successfully, ordered items would be sent to the user via email with total cost.
+
+## Homework Assignment 3
+_Client side dev for the Pizza API_
+
+To build the simple front-end for the Pizza API from the Homework-2. ([Original Spec](https://pirple.thinkific.com/courses/take/the-nodejs-master-class/texts/4342329-homework-assignment-3))
+
+1. [Signup on the site](#Signup-on-the-site)
+2. [View all the items available to order](#view-all-items)
+3. [Fill up a shopping cart](#shopping-cart)
+4. [Place an order](#Checkout-process) \(with [fake credit card credentials](https://stripe.com/docs/testing#cards)\), and receive an email receipt.
+
+### Before diving into coding
+
+#### Signup on the site
+
+The following needs to be created - 
+
+* [ ] `Sign Up` Page, and then then `Update Profile` Page.
+* [X] ~~*`Log On` would do `POST /api/tokens?` to create a token.*~~ [2018-10-22]
+    * [ ] Need to support `/api/tokens?id` option.
+* [X] ~~*`Log Out` would do `DELETE /api/tokens?` to delete the token with ID.*~~ [2018-10-22]
+
+#### View all items
+
+This is simply a front-end representation of the `GET /api/items`
+
+By default, this page should be visible to public.
+
+As such, we need to make sure the Meta data for SEO.
+
+The link would be `http://localhost:3000/items` or `https://localhost:3001/items`
+
+#### Shopping cart
+
+Fill up a shopping cart requires an `Edit` page for the cart.
+
+[ ] Review the server logic on the cart.
+
+ * Where to add/delete cart for example.
+
+#### Checkout process
+
+* [X] ~~*`Checkout` button on the `Shopping cart` page to generate the order for checkout.*~~ [2018-10-22]
+* [X] ~~*`Checkout Page` for payment and shipping address*~~ [2018-10-22]
+* [X] ~~*`Email notification` upon success payment made.*~~ [2018-10-22]
+* [X] ~~*`On screen` notification upon success payment made and email.*~~ [2018-10-22]
+
+### Work log
+
+Due to the holiday and daytime workload, this project was delayed for quite a long time unfortunately.

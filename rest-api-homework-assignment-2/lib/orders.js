@@ -18,30 +18,23 @@ const orders = {};
 
 orders.post = (data, callback) => {
   auth(data, () => {
-    withUserId(data, () => {
       const order = helpers.validate(data.payload.order, {type: 'array'});
       if(order) {
-        _data.create(['orders', data.payload.userId].join(path.sep), helpers.createRandomString(20), order, err => {
+        _data.create(['orders', data.payload.token.userId].join(path.sep), helpers.createRandomString(20), order, err => {
           if(!err) {
             // 1. Charge the user via stripe.
             const card = helpers.validate(data.payload.card, {type: 'object'});
             if(card) {
               helpers.charge(card, order, err => {
                 if(!err) {
-                  _data.read('users', data.payload.userId, (err, user) =>{
-                      if(!err && user) {
-                          helpers.sendInvoice(user, order, (err) => {
-                              if(!err) {
-                                  callback(200);
-                              } else {
-                                  debug(helpers.ansiColorString.CYAN, err);
-                                  callback(500, {'Error': 'Error sending email.'})
-                              }
-                          })
-                      } else {
-                          callback(500, {'Error': 'Failed to retrieve user record'});
-                      }
-                  });
+                  helpers.sendInvoice(data.payload.user, order, (err) => {
+                    if(!err) {
+                        callback(200);
+                    } else {
+                        debug(helpers.ansiColorString.CYAN, err);
+                        callback(500, {'Error': 'Error sending email.'})
+                    }
+                  })
                 }
               })
             } else {
@@ -56,7 +49,6 @@ orders.post = (data, callback) => {
         debug(helpers.ansiColorString.MAGENTA, 'Order provided is invalid');
         callback(400, {'Error': 'Missing required field(s).'});
       }
-    }, callback);
   }, callback);
 };
 

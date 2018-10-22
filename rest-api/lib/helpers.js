@@ -240,7 +240,7 @@ helpers.getStaticAsset = function(fileName, callback) {
             if(!err && data) {
                 callback(false, data);
             } else {
-                debug(err);
+                debug(err, data);
                 callback('No file could be found.');
             }
         });

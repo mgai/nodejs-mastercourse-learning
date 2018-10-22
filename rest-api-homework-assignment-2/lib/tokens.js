@@ -97,6 +97,7 @@ tokens.put = (data, callback) => {
             }
         })
     } else {
+        debug('ID && Extend: ', id, extend);
         callback(400, {'Error': 'Missing required field(s) or invalid.'});
     }
 }
@@ -136,13 +137,30 @@ tokens.delete = (data, callback) => {
                 if(!err) {
                     callback(200);
                 } else {
-                    debug('Failed to delete token - ', error);
+                    debug('Failed to delete token - ', err);
                     callback(500, {'Error': 'Could not delete the token specified.'})
                 }
             })
         });
     }
 }
+
+/**
+ * Verify a token is not expired.
+ * @param tokenId
+ * @param callback(err) - callback(false) if OK.
+ */
+tokens.isValid = (tokenId, callback) => {
+    _data.read('tokens', tokenId, (err, token) => {
+        if(!err && token) {
+            callback(token.expires <= Date.now(), token);  // False when valid.
+        } else {
+            debug('Error when validating the token.', err);
+            callback('Token is not valid.');
+        }
+    })
+}
+
 
 // Users routing check.
 tokens.routing = (data, callback) => {

@@ -21,9 +21,55 @@ const tokens = require('./tokens');
 const items = require('./items');
 const carts = require('./carts');
 const orders = require('./orders');
+const handlers = require('./handlers');
 
 // Server container.
 const server = {};
+
+server.responseToClient = function(statusCode, payload, contentType, res) {
+    // Default to JSON is not specified or invalid contentType.
+    // Default is commented out since it'll be assigned in the default switch case.
+    // contentType = typeof(contentType) == 'string' ? contentType: 'json';
+    // Default to status 200 if not specified or invalid.
+    statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+
+    let payloadString='';
+    switch(contentType) {
+        case 'html':
+            res.setHeader('Content-Type', 'text/html');
+            payloadString = typeof(payload) == 'string' ? payload : '';
+            break;
+        case 'css':
+            res.setHeader('Content-Type', 'text/css');
+            payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            break;
+        case 'favicon' :
+            res.setHeader('Content-Type', 'image/x-icon');
+            payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            break;
+        case 'png':
+            res.setHeader('Content-Type', 'image/png');
+            payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            break;
+        case 'jpg':
+            res.setHeader('Content-Type', 'image/jpeg');
+            payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            break;
+        case 'plain':
+            res.setHeader('Content-Type', 'text/plain');
+            payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            break;
+        // case 'json':
+        default:
+            res.setHeader('Content-Type', 'application/json');
+            payload = typeof(payload) == 'object' ? payload: {};
+            payloadString = JSON.stringify(payload);
+    }
+
+    res.writeHead(statusCode);
+    res.end(payloadString);
+
+}
 
 // Server logic for both http and https
 server.unifiedServer = function(req, res) {
@@ -53,27 +99,20 @@ server.unifiedServer = function(req, res) {
             'payload': helpers.parseJsonToObject(buffer)
         };
 
+        debug(helpers.ansiColorString.BLUE, 'Dumping request info extracted');
         debug(data);
+        debug(helpers.ansiColorString.BLUE, 'End of request dump');
+    
         
         // Routing.
-        const chosenHandler = typeof(server.router[trimmedPath]) !== 'undefined' ? server.router[trimmedPath] : server.router.notfound;
-
-        chosenHandler(data, (statusCode, payload) => {
-            // Default to 200 - OK.
-            statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
-            // Convert the payload to string for returning.
-            const payloadString = JSON.stringify(payload);
-
-            // Response to client.
-            res.setHeader('Content-Type', 'application/json'); // Returns JSON.
-            res.writeHead(statusCode);
-            res.end(payloadString);
-
-            debug(statusCode, payload);
-
-            // TODO: Logging.
+        let chosenHandler = typeof(server.router[trimmedPath]) !== 'undefined' ? server.router[trimmedPath] : server.router.notfound;
+        // Here we need to enhance the handler for public, so that it supports wildcard 'public/*'.
+        chosenHandler = trimmedPath.indexOf('public/') > -1 ? handlers.public : chosenHandler;
+        
+        chosenHandler(data, function (statusCode, payload, contentType) {
+            server.responseToClient(statusCode, payload, contentType, res);
         });
-    })
+    });
 };
 
 // Initiate the HTTP server.
@@ -93,11 +132,29 @@ server.notfound = function(data, callback) {
 
 // TODO: Define the routers.
 server.router = {
-    'users': users.routing,
-    'tokens': tokens.routing,
-    'items': items.routing,
-    'carts': carts.routing,
-    'orders': orders.routing,
+    // Front-end routers.
+    '': handlers.index,
+    'favicon.ico': handlers.favicon,
+    'public': handlers.public,
+    'items': handlers.items,
+    // Sign Up page.
+    'account/create': handlers.accountCreate,
+    'account/edit': handlers.accountEdit,
+    'account/deleted': handlers.accountDeleted,
+    // Log on.
+    'session/create': handlers.sessionCreate,
+    // Log out.
+    'session/deleted': handlers.sessionDeleted,
+    'carts': handlers.cartsEdit,
+    'order/checkout': handlers.orderCheckout,
+    'order/edit': handlers.orderEdit,
+    'order/sent': handlers.orderSent,
+    // API routers.
+    'api/users': users.routing,
+    'api/tokens': tokens.routing,
+    'api/items': items.routing,
+    'api/carts': carts.routing,
+    'api/orders': orders.routing,
     'notfound': server.notfound
 };
 

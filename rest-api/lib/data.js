@@ -109,7 +109,7 @@ lib.list = function(dir, callback) {
             let trimmedFileNames = data.map(e => e.replace('.json', ''));
             callback(false, trimmedFileNames);
         } else {
-            callback(new Error('failed to list files:' + err.message));
+            callback(new Error('failed to list files:' + err));
         }
     });
 }
