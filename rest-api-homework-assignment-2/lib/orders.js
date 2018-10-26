@@ -20,7 +20,7 @@ orders.post = (data, callback) => {
   auth(data, () => {
       const order = helpers.validate(data.payload.order, {type: 'array'});
       if(order) {
-        _data.create(['orders', data.payload.token.userId].join(path.sep), helpers.createRandomString(20), order, err => {
+        _data.create(['orders', data.payload.token.userId].join(path.sep), helpers.createRandomString(20), {...order, 'createdAt': Date.now()}, err => {
           if(!err) {
             // 1. Charge the user via stripe.
             const card = helpers.validate(data.payload.card, {type: 'object'});

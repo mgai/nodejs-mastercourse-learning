@@ -26,7 +26,7 @@ users.post = function(data, callback) {
                 if(err) { // Proceed only when failed to read record.
                     const hashedPassword = helpers.hash(password);
                     if(hashedPassword) {
-                        const user = { name, email, address, hashedPassword };
+                        const user = { name, email, address, hashedPassword, 'createdAt': Date.now() };
                         _data.create('users', id, user, err => {
                             if(!err) {
                                 callback(200);

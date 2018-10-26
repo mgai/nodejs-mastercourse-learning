@@ -198,8 +198,34 @@ list items
 
 List all items available in the APP for order.
 
+Basically - `console.dir(require('./all-items.json'), {'color': true})`
+
 ### list new orders
 
 ```
 list new orders
+```
+
+By checking the `order.createdAt` attribute against `Date.now() - 1000 * 3600 * 24`.
+
+### more order info
+
+```
+more order info --{userId/orderId}
+```
+
+Because in my current implementation, the `orders` are nested inside each `userId` folder, hence you need to provide the parameter in the form of `userId/orderId`, for the information to be displayed.
+
+### list new users
+
+```
+list new users
+```
+
+By checking the `user.createdAt` attribute against `Date.now() - 1000 * 3600 * 24`.
+
+### more user info
+
+```
+more order info --{userId}
 ```
