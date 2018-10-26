@@ -4,6 +4,7 @@
 
 * [Homework 2](#Homework-Assignment-2)
 * [Homework 3](#Homework-Assignment-3)
+* [Homework 4](#Homework-Assignment-4)
 
 
 ## Homework Assignment 2
@@ -149,3 +150,56 @@ Fill up a shopping cart requires an `Edit` page for the cart.
 ### Work log
 
 Due to the holiday and daytime workload, this project was delayed for quite a long time unfortunately.
+
+## Homework Assignment 4
+
+### Requirement
+
+To add the Admin CLI for the pizza-delivery app, which would allow the managers to perform the following - 
+
+* View all the current menu items.
+* View all the recent orders in the system (orders placed in the 24 hours)
+* Lookup the details of a specfic order by order ID
+* View all the users who have signed up in the last 24 hours.
+* Lookup the details of a specific user by email address.
+
+### Design - events
+
+* [exit](#exit)
+* [man/help](#man/help)
+* [list items](#list-items)
+* [list new orders](#list-new-orders)
+* [more order info](#more-order-info)
+* [list new uers](#list-new-users)
+* [more user info](#more-user-info)
+
+#### exit
+
+```
+exit
+```
+
+Exit command that would trigger the program to exit.
+
+#### man/help
+
+```
+man
+help
+```
+
+Show user manual for the CLI commands.
+
+#### list items
+
+```
+list items
+```
+
+List all items available in the APP for order.
+
+### list new orders
+
+```
+list new orders
+```
