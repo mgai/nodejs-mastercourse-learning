@@ -410,6 +410,10 @@ handlers.hello = function(data, callback) {
     callback(200, {'message': 'Hello my friend.'});
 }
 
+handlers.exampleError = function(data, callback) {
+    let err = new Error('This is an example error.');
+    throw(err);
+};
 
 // Conatiner for users sub methods.
 handlers._users = {};
