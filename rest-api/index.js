@@ -10,7 +10,7 @@ const cli = require('./lib/cli');
 // Declare the app.
 const app = {};
 
-app.init = function() {
+app.init = function(callback) {
     // Start the server.
     server.init();
 
@@ -27,9 +27,13 @@ app.init = function() {
     // Putting in a delayed execution would make sure any screen output would be done first.
     setTimeout(function() {
         cli.init();
+        callback(); // This is for the testing purpose.
     }, 50);
 };
 
-app.init();
+// Self invoking only if required.
+if(require.main === module) {   // This will be triggered ONLY when the file itself is being executed. Not in require().
+    app.init(()=>{});
+}
 
 module.exports = app;   // For testing.

@@ -52,6 +52,20 @@ environments.production = {
     }
 };
 
+// Testing environment
+environments.testing = {
+    'httpPort': 4000,
+    'httpsPort': 4001,
+    'envName': 'testing',
+    'hashingSecret': 'thisIsASecret',
+    'maxChecks': 5,
+    twilio, // Here it's passed by reference.
+    templateGlobals: {
+        ...templateGlobals,
+        'baseUrl': 'http://localhost:4000/'
+    }
+};
+
 // Determine which enviornment was passed as a command-line arg.
 let currentEnvironment = typeof(process.env.NODE_ENV) == 'string' ? process.env.NODE_ENV.toLowerCase() : '';
 

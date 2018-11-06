@@ -3,37 +3,16 @@
  *
  */
 
-const helpers = require('../lib/helpers');
-const assert = require('assert'); // Built-in assertion library in Node JS.
+// Override the NODE_ENV.
+process.env.NOE_ENV='testing';
 
 // Application logic for the test runner.
 let _app = {};
 
 // Container for the tests.
-_app.tests = {
-    'unit': {}
-};
-
-// Assert getANumber() is returning an Number.
-// done() is the callback once test completes.
-
-_app.tests.unit['helpers.getANumber should return 1'] = function(done) {
-    let val = helpers.getANumber();
-    assert.equal(val, 1);
-    done();
-};
-
-_app.tests.unit['helpers.getANumber should return a Number'] = function(done) {
-    let val = helpers.getANumber();
-    assert.equal(typeof(val), 'number');
-    done();
-};
-
-_app.tests.unit['helpers.getANumber should return 2'] = function(done) {
-    let val = helpers.getANumber();
-    assert.equal(val, 2);
-    done();
-};
+_app.tests = {};
+_app.tests.unit = require('./unit');
+_app.tests.api = require('./api');
 
 _app.countTests = function() {
     let counter = 0;
@@ -116,6 +95,7 @@ _app.produceTestReport = function(limit, successes, errors) {
 
     console.log("");
     console.log("-----------End Test Report------------")
+    process.exit(0);    // This is to quit the app server.
 }
 
 _app.runTests();
