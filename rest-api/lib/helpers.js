@@ -18,6 +18,8 @@ let helpers = {};
 
 // Helpers.
 
+helpers.getANumber = function () { return 1; };
+
 // SHA256 hash.
 helpers.hash = function(str) {
     if(typeof(str) == 'string' && str.length>0) {
