@@ -8,8 +8,13 @@ lib.getNumberOne = () => { return 1; };
 
 lib.getNumberOneAsync = (callback) => { callback(1); };
 
-lib.acceptNumberOnly = (num) => {
+// callback(err)
+lib.acceptNumberOnly = (num, callback) => {
     if(typeof(num)!== 'number') {
-        
+        callback(new TypeError('Only number is accepted'));
+    } else {
+        callback();
     }
-}
+};
+
+module.exports = lib;
