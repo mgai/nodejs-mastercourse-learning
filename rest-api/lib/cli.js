@@ -10,6 +10,7 @@ const readline = require('readline');
 const util = require('util');
 const debug = util.debuglog('cli');
 const events = require('events');
+const childProcess = require('child_process');
 
 const helpers = require('./helpers');
 const _data = require('./data');
@@ -269,7 +270,23 @@ cli.responders.moreCheckInfo = function(str) {
     }
 };
 
-cli.responders.listLogs = function() {
+cli.responders.listLogChildProcess = function() {
+    let ls = childProcess.spawn('ls', ['./.logs/']);
+    ls.stdout.on('data', function(dataObject) {
+        // Explode into separate lines.
+        let dataStr = dataObject.toString();
+        let logFileNames = dataStr.split('\n');
+        cli.verticalSpace();
+        logFileNames.forEach(logFileName => {
+            if(typeof(logFileName) == 'string' && logFileName.length> 0 && logFileName.indexOf('-') > -1) { // '-' is used to identify the compressed logs.
+                console.log(logFileName.trim().split('.')[0]);
+                cli.verticalSpace();
+            }
+        });
+    });
+}
+
+cli.responders.listLogsJavaScript = function() {
     _logs.list(true, function(err, logFileNames){
         if(!err && logFileNames && logFileNames.length > 0) {
             cli.verticalSpace();
@@ -282,6 +299,8 @@ cli.responders.listLogs = function() {
         }
     })
 };
+
+cli.responders.listLogs = cli.responders.listLogChildProcess;
 
 cli.responders.moreLogInfo = function(str) {
     // Get the ID from the string
