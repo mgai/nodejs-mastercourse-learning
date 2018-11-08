@@ -7,6 +7,12 @@
 const _data = require('./data');
 const helpers = require('./helpers');
 
+const _performance = require('perf_hooks').performance;
+const PerformanceObserver = require('perf_hooks').PerformanceObserver;
+const util = require('util');
+const debug = util.debuglog('performance'); // We want to have performance logged only when debugging.
+
+
 // Contanier for export.
 const tokenHandlers = {};
 
@@ -35,16 +41,33 @@ tokenHandlers.get = function(data, callback) {
  * @requires data {phone, password}
  */
 tokenHandlers.post = function(data, callback) {
+    const obs = new PerformanceObserver((list) => {
+        debug('Observer in action');
+        const measurements = list.getEntries();
+        measurements.forEach(m => {
+            console.log('\x1b[33m%s\x1b[0m', m.name,  m.duration);
+        });
+    })
+    obs.observe({entryTypes: ['measure'], buffered: true});
+
+    debug('TokenHandlers.post in action.');
+    _performance.mark('entered function');
     let phone = typeof(data.payload.phone) == 'string' && data.payload.phone.trim().length > 0 ? data.payload.phone.trim() : false;
     let password = typeof(data.payload.password) == 'string' && data.payload.password.trim().length > 5 ? data.payload.password.trim() : false;
+    _performance.mark('input validated');
     if(phone && password) {
+        _performance.mark('beginning user lookup');
         // Look up by phone.
         _data.read('users', phone, function(err, user){
+            _performance.mark('user lookup completed');
             if(!err && user) {
+                _performance.mark('beginning password hashing');
                 let hashedPassword = helpers.hash(password);
+                _performance.mark('password hashing completed');
                 if (hashedPassword == user.hashedPassword) {
                     // Create a new token witha random name.
                     // Set expiration date 1 hour in the future.
+                    _performance.mark('creating data for token');
                     let tokenId = helpers.createRandomString(20);
                     let expires = Date.now() + 1000 * 60 * 60; // 1hr from now.
                     let tokenObject = {
@@ -53,7 +76,18 @@ tokenHandlers.post = function(data, callback) {
                         phone
                     };
 
+                    _performance.mark('beginning storing token');
                     _data.create('tokens', tokenId, tokenObject, function(err) {
+                        _performance.mark('storing token completed');
+
+                        // Gather all the measurements.
+                        _performance.measure('Beginning to end', 'entered function', 'storing token completed');
+                        _performance.measure('Validating user input', 'entered function', 'input validated');
+                        _performance.measure('User lookup', 'beginning user lookup', 'user lookup completed');
+                        _performance.measure('Password hashing', 'beginning password hashing', 'password hashing completed');
+                        _performance.measure('Token data creation', 'creating data for token', 'beginning storing token');
+                        _performance.measure('Token data storing', 'beginning storing token', 'storing token completed');
+
                         if(!err) callback(200, tokenObject);
                         else callback(500, {'Error': 'Could not create new token.'});
                     });
