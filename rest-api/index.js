@@ -9,6 +9,9 @@ const url = require('url');
 const fs = require('fs');
 const StringDecoder = require('string_decoder').StringDecoder;
 
+const os = require('os');
+const cluster = require('cluster');
+
 const config = require('./config'); // Default to load `config.js`.
 
 // All the server logic for both http and https.
@@ -77,26 +80,35 @@ const unifiedServer = function(req, res) {
     });
 };
 
-// Instantiate the HTTP server.
-const httpServer = http.createServer(unifiedServer);
+const init = function() {
+    if(cluster.isMaster) {
+        for(let i=0; i<os.cpus().length; i++) {
+            cluster.fork();
+        }
+    } else {
+        // Instantiate the HTTP server.
+        const httpServer = http.createServer(unifiedServer);
 
-// Start the server, and have it listen on the port 3000.
-httpServer.listen(config.httpPort, function(){
-    console.log(`The server is listening on port ${config.httpPort} now in ${config.envName} mode.`);
-});
+        // Start the server, and have it listen on the port 3000.
+        httpServer.listen(config.httpPort, function(){
+            console.log(`The server is listening on port ${config.httpPort} now in ${config.envName} mode.`);
+        });
 
-// Instantiate the HTTPS server.
-const httpsServerOptions = {
-    'key': fs.readFileSync('./https/key.pem'),
-    'cert': fs.readFileSync('./https/cert.pem')
+        // Instantiate the HTTPS server.
+        const httpsServerOptions = {
+            'key': fs.readFileSync('./https/key.pem'),
+            'cert': fs.readFileSync('./https/cert.pem')
+        };
+        const httpsServer = https.createServer(httpsServerOptions, unifiedServer);
+
+        // Start the HTTPS server.
+        httpsServer.listen(config.httpsPort, function(){
+            console.log(`The server is listening on port ${config.httpsPort} now in ${config.envName} mode.`);
+        });
+    }
 };
-const httpsServer = https.createServer(httpsServerOptions, unifiedServer);
 
-// Start the HTTPS server.
-httpsServer.listen(config.httpsPort, function(){
-    console.log(`The server is listening on port ${config.httpsPort} now in ${config.envName} mode.`);
-});
-
+init();
 
 
 // Define the handlers.
